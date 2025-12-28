@@ -1,0 +1,113 @@
+package com.omedacore.someweather.presentation.screens
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.omedacore.someweather.presentation.viewmodel.ForecastUiState
+import com.omedacore.someweather.presentation.viewmodel.MobileWeatherViewModel
+import com.omedacore.someweather.presentation.viewmodel.WeatherUiState
+import com.omedacore.someweather.shared.data.model.UnitSystem
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun WeatherDisplayScreen(
+    viewModel: MobileWeatherViewModel,
+    uiState: WeatherUiState,
+    forecastState: ForecastUiState,
+    onCityChange: () -> Unit,
+    onSettings: () -> Unit
+) {
+    val unitSystem by viewModel.unitSystem.collectAsState()
+    val savedCity by viewModel.savedCity.collectAsState()
+
+    LaunchedEffect(savedCity) {
+        savedCity?.let { city ->
+            viewModel.fetchWeather(city)
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Some Weather") },
+                actions = {
+                    IconButton(onClick = { viewModel.refreshWeather() }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                    }
+                    IconButton(onClick = onSettings) {
+                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        when (uiState) {
+            is WeatherUiState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            is WeatherUiState.Success -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentPadding = PaddingValues(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    item {
+                        CurrentWeatherSection(
+                            weather = uiState.weather,
+                            unitSystem = unitSystem ?: UnitSystem.METRIC
+                        )
+                    }
+                    item {
+                        ForecastSection(
+                            forecastState = forecastState,
+                            unitSystem = unitSystem ?: UnitSystem.METRIC
+                        )
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    item {
+                        OpenWeatherAttribution()
+                    }
+                }
+            }
+
+            is WeatherUiState.Error -> {
+                ErrorContent(
+                    message = uiState.message,
+                    onRetry = { viewModel.refreshWeather() },
+                    onCityChange = onCityChange,
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
+
+            is WeatherUiState.Initial -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
+    }
+}
