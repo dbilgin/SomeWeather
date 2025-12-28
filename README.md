@@ -2,9 +2,9 @@
 
 A simple weather application for Android smartphones and Wear OS devices, featuring home screen widgets, watch tiles, and complications. No location permissions required.
 
-[Android Wearable App](./wear/README.md)
-
 [Android App](./mobile/README.md)
+
+[Android Wearable App](./wear/README.md)
 
 <div>
    <img width="300" alt="AndroidMain1" src="https://github.com/user-attachments/assets/f9e72fee-3907-4c39-a35b-3a40b3163bf0" />
