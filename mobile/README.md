@@ -58,10 +58,4 @@ Add a weather widget to your home screen:
 
 ### Settings
 
-Configure your weather preferences:
-
-- Change city
-- Switch between metric and imperial units
-- Refresh weather data
-
 <img width="300" alt="AndroidSettings" src="https://github.com/user-attachments/assets/52f76770-c676-4347-874b-8bb5aee6b426" />
