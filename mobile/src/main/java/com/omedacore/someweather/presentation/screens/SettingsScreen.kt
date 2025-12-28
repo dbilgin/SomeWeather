@@ -1,5 +1,6 @@
 package com.omedacore.someweather.presentation.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -16,6 +17,8 @@ fun SettingsScreen(
     viewModel: MobileWeatherViewModel,
     onBack: () -> Unit
 ) {
+    BackHandler(onBack = onBack)
+    
     val unitSystem by viewModel.unitSystem.collectAsState()
     val savedCity by viewModel.savedCity.collectAsState()
     var showCityInputDialog by remember { mutableStateOf(false) }
