@@ -3,6 +3,7 @@ package com.omedacore.someweather.presentation.screens
 import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.*
@@ -55,6 +56,7 @@ fun ErrorContent(
 @Composable
 fun OpenWeatherAttribution() {
     val context = LocalContext.current
+    val isDarkTheme = isSystemInDarkTheme()
 
     Column(
         modifier = Modifier
@@ -63,7 +65,7 @@ fun OpenWeatherAttribution() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(id = SharedR.drawable.openweather_light),
+            painter = painterResource(id = if (isDarkTheme) SharedR.drawable.openweather_dark else SharedR.drawable.openweather_light),
             contentDescription = "OpenWeather Logo",
             modifier = Modifier
                 .height(40.dp),

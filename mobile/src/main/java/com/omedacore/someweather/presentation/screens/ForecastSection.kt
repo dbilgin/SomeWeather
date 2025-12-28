@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,6 +19,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -147,10 +150,12 @@ private fun ForecastDayCard(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.weight(1f)
                 ) {
+                    val isDarkTheme = isSystemInDarkTheme()
                     Image(
                         painter = painterResource(id = iconResId),
                         contentDescription = mainCondition?.description ?: "",
-                        modifier = Modifier.size(48.dp)
+                        modifier = Modifier.size(48.dp),
+                        colorFilter = if (isDarkTheme) ColorFilter.tint(Color.White) else null
                     )
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
@@ -236,10 +241,12 @@ private fun ForecastItemRow(
 
             Column(modifier = Modifier.weight(0.3f)) {
                 // Weather icon
+                val isDarkTheme = isSystemInDarkTheme()
                 Image(
                     painter = painterResource(id = iconResId),
                     contentDescription = condition?.description ?: "",
-                    modifier = Modifier.size(36.dp)
+                    modifier = Modifier.size(36.dp),
+                    colorFilter = if (isDarkTheme) ColorFilter.tint(Color.White) else null
                 )
 
                 // Temperature

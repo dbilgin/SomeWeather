@@ -3,6 +3,7 @@ package com.omedacore.someweather.presentation.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.*
@@ -10,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -72,10 +74,12 @@ fun CurrentWeatherSection(
             )
 
             // Weather icon
+            val isDarkTheme = isSystemInDarkTheme()
             Image(
                 painter = painterResource(id = iconResId),
                 contentDescription = condition.description.ifEmpty { condition.main },
-                modifier = Modifier.size(120.dp)
+                modifier = Modifier.size(120.dp),
+                colorFilter = if (isDarkTheme) ColorFilter.tint(Color.White) else null
             )
 
             Spacer(modifier = Modifier.height(16.dp))
