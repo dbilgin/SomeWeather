@@ -21,7 +21,10 @@ The main app displays comprehensive weather information including:
 - Wind speed (formatted with locale-aware number formatting)
 - Attribution
 
-<img width="300" alt="AndroidMain1" src="https://github.com/user-attachments/assets/f9e72fee-3907-4c39-a35b-3a40b3163bf0" />
+<div>
+   <img width="300" alt="WearMain1" src="https://github.com/user-attachments/assets/a30e0602-353c-4d20-80b6-290a8160993f" />
+   <img width="300" alt="WearMain2" src="https://github.com/user-attachments/assets/140d9b6f-9372-4a26-93dc-643204c3b6b0" />
+</div>
 
 ### Complications
 
@@ -33,7 +36,7 @@ Add weather complications to your watch face:
 Complications automatically update (configurable via `UPDATE_PERIOD_SECONDS` in AndroidManifest.xml).
 
 <div>
-   <img width="300" height="300" alt="Complication" src="https://github.com/user-attachments/assets/e73fea7c-92b6-4d6e-b58e-889415648909" />
+   <img width="300" alt="WearComplication" src="https://github.com/user-attachments/assets/2543e30c-b446-4825-b15a-4ce267ebc3f1" />
 </div>
 
 ### Tile
@@ -45,12 +48,12 @@ Add the weather tile to your watch's tile carousel:
 - Tap anywhere on the tile to open the main app
 
 <div>
-   <img width="300" height="300" alt="Tile" src="https://github.com/user-attachments/assets/bc5afdb7-88e2-46f4-9fa6-d2d988df4874" />
+   <img width="300" alt="WearTile" src="https://github.com/user-attachments/assets/e933ae18-5d97-4d4f-9230-7c95412de126" />
 </div>
 
 ### Settings
 
 <div>
-   <img width="300" height="300" alt="ChangeCity" src="https://github.com/user-attachments/assets/e56e1baa-2fc9-422b-b598-45279438ac83" />
-   <img width="300" height="300" alt="Unit" src="https://github.com/user-attachments/assets/fcc17673-e8f9-4b82-8472-31a9799c02ee" />
+   <img width="300" alt="WearSettings1" src="https://github.com/user-attachments/assets/b82031ce-eef7-4f96-941c-c652741c773f" />
+   <img width="300" alt="WearSettings2" src="https://github.com/user-attachments/assets/85509c31-4301-4052-ae97-b08c336efae4" />
 </div>
