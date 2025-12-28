@@ -6,6 +6,11 @@ A simple weather application for Android smartphones and Wear OS devices, featur
 
 [Android App](./mobile/README.md)
 
+<div>
+   <img width="300" alt="AndroidMain" src="https://github.com/user-attachments/assets/1edfe5b3-0416-4bf2-b0b6-a0ddf09f9c95" />
+   <img width="300" alt="WearMain" src="https://github.com/user-attachments/assets/e373b719-5203-4897-9120-095c96cebc27" />
+</div>
+
 ## Setup
 
 1. Clone this repository
