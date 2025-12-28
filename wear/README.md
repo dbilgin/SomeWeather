@@ -21,10 +21,7 @@ The main app displays comprehensive weather information including:
 - Wind speed (formatted with locale-aware number formatting)
 - Attribution
 
-<div>
-   <img width="300" height="300" alt="Current1"  src="https://github.com/user-attachments/assets/2f6a8c54-0bec-4850-9199-a12d9db60532" />
-   <img width="300" height="300" alt="Current2" src="https://github.com/user-attachments/assets/200ae89e-7fb7-44a8-a5ff-a8b0f3134501" />
-</div>
+<img width="300" alt="AndroidMain1" src="https://github.com/user-attachments/assets/f9e72fee-3907-4c39-a35b-3a40b3163bf0" />
 
 ### Complications
 
