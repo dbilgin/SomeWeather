@@ -1,9 +1,7 @@
 package com.omedacore.someweather.presentation.screens
 
 import android.content.Intent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.*
@@ -11,12 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.omedacore.someweather.shared.R as SharedR
 
 @Composable
 fun ErrorContent(
@@ -54,9 +50,8 @@ fun ErrorContent(
 }
 
 @Composable
-fun OpenWeatherAttribution() {
+fun WeatherAttribution() {
     val context = LocalContext.current
-    val isDarkTheme = isSystemInDarkTheme()
 
     Column(
         modifier = Modifier
@@ -64,18 +59,8 @@ fun OpenWeatherAttribution() {
             .padding(vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            painter = painterResource(id = if (isDarkTheme) SharedR.drawable.openweather_dark else SharedR.drawable.openweather_light),
-            contentDescription = "OpenWeather Logo",
-            modifier = Modifier
-                .height(40.dp),
-            contentScale = androidx.compose.ui.layout.ContentScale.Fit
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
         Text(
-            text = "Weather data provided by OpenWeather",
+            text = "Weather data by Open-Meteo.com",
             style = MaterialTheme.typography.labelSmall.copy(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textDecoration = TextDecoration.Underline
@@ -85,7 +70,26 @@ fun OpenWeatherAttribution() {
                 .clickable {
                     val intent = Intent(Intent.ACTION_VIEW)
                         .addCategory(Intent.CATEGORY_BROWSABLE)
-                        .setData("https://openweathermap.org/".toUri())
+                        .setData("https://open-meteo.com/".toUri())
+                    context.startActivity(intent)
+                }
+                .padding(vertical = 4.dp)
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "LICENSE",
+            style = MaterialTheme.typography.labelSmall.copy(
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textDecoration = TextDecoration.Underline
+            ),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier
+                .clickable {
+                    val intent = Intent(Intent.ACTION_VIEW)
+                        .addCategory(Intent.CATEGORY_BROWSABLE)
+                        .setData("https://github.com/open-meteo/open-meteo/blob/main/LICENSE".toUri())
                     context.startActivity(intent)
                 }
                 .padding(vertical = 4.dp)

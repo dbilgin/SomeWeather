@@ -26,9 +26,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.omedacore.someweather.shared.R as SharedR
-import com.omedacore.someweather.data.model.ForecastItem
+import com.omedacore.someweather.shared.data.model.ForecastItem
 import com.omedacore.someweather.data.util.WeatherIconHelper
-import com.omedacore.someweather.presentation.viewmodel.ForecastUiState
 import com.omedacore.someweather.shared.data.model.UnitSystem
 import com.omedacore.someweather.shared.data.util.WeatherFormatter
 import java.text.SimpleDateFormat
@@ -36,63 +35,43 @@ import java.util.*
 
 @Composable
 fun ForecastSection(
-    forecastState: ForecastUiState,
+    forecastItems: List<ForecastItem>,
+    sunrise: Long,
+    sunset: Long,
     unitSystem: UnitSystem
 ) {
-    when (forecastState) {
-        is ForecastUiState.Loading -> {
-            Column {
-                Text(
-                    text = "5-Day Forecast",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
-                // Show 5 skeleton cards
-                repeat(5) {
-                    ForecastDayCardSkeleton()
-                }
+    if (forecastItems.isEmpty()) {
+        // Empty state - show skeleton while loading
+        Column {
+            Text(
+                text = "5-Day Forecast",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+            repeat(5) {
+                ForecastDayCardSkeleton()
             }
         }
+    } else {
+        val groupedForecast = groupForecastByDay(forecastItems)
 
-        is ForecastUiState.Success -> {
-            val forecast = forecastState.forecast
-            val groupedForecast = groupForecastByDay(forecast.list)
-
-            Column {
-                Text(
-                    text = "5-Day Forecast",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
-                groupedForecast.forEach { (date, items) ->
-                    ForecastDayCard(
-                        date = date,
-                        items = items,
-                        unitSystem = unitSystem
-                    )
-                }
-            }
-        }
-
-        is ForecastUiState.Error -> {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer
-                )
-            ) {
-                Text(
-                    text = "Forecast: ${forecastState.message}",
-                    modifier = Modifier.padding(16.dp),
-                    color = MaterialTheme.colorScheme.onErrorContainer
+        Column {
+            Text(
+                text = "5-Day Forecast",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+            groupedForecast.forEach { (date, items) ->
+                ForecastDayCard(
+                    date = date,
+                    items = items,
+                    sunrise = sunrise,
+                    sunset = sunset,
+                    unitSystem = unitSystem
                 )
             }
-        }
-
-        is ForecastUiState.Initial -> {
-            // Empty state
         }
     }
 }
@@ -101,6 +80,8 @@ fun ForecastSection(
 private fun ForecastDayCard(
     date: String,
     items: List<ForecastItem>,
+    sunrise: Long,
+    sunset: Long,
     unitSystem: UnitSystem
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -114,8 +95,8 @@ private fun ForecastDayCard(
     val iconResId = mainCondition?.let {
         WeatherIconHelper.getWeatherIconResId(
             it.conditionCode,
-            null,
-            null
+            sunrise,
+            sunset
         )
     } ?: SharedR.drawable.x
 
@@ -294,7 +275,7 @@ private fun ForecastItemRow(
                     )
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (precipitation != null || (item.pop != null && item.pop > 0.0)) {
+                    if (precipitation != null || pop != null) {
                         Text(
                             text = "Pre.: ",
                             style = MaterialTheme.typography.labelSmall,
@@ -308,9 +289,9 @@ private fun ForecastItemRow(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    pop?.let { pop ->
+                    pop?.let { popValue ->
                         Text(
-                            text = pop,
+                            text = popValue,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

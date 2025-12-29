@@ -2,11 +2,6 @@
 
 A standalone Wear OS weather app that displays current conditions, temperature directly on your watch. No phone companion app required, no location permissions needed.
 
-## Requirements
-
-- Wear OS 3.0+ (Android API 30+)
-- OpenWeatherMap API key
-
 ## Usage
 
 ### Main App

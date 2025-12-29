@@ -2,11 +2,6 @@
 
 A clean and modern Android weather app that displays current conditions and detailed forecasts. No location permissions required - simply enter your city name.
 
-## Requirements
-
-- Android API 30+
-- OpenWeatherMap API key
-
 ## Usage
 
 ### Main App

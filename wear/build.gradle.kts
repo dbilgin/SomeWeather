@@ -4,17 +4,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-val keyPropertiesFile = rootProject.file("key.properties")
-val weatherApiKey: String = if (keyPropertiesFile.exists()) {
-    val lines = keyPropertiesFile.readLines()
-    lines.find { it.startsWith("WEATHER_API_KEY=") }
-        ?.substringAfter("WEATHER_API_KEY=")
-        ?.trim()
-        ?: ""
-} else {
-    ""
-}
-
 android {
     namespace = "com.omedacore.someweather"
     compileSdk {
@@ -27,8 +16,6 @@ android {
         targetSdk = 36
         versionCode = 3
         versionName = "1.2"
-
-        buildConfigField("String", "WEATHER_API_KEY", "\"$weatherApiKey\"")
     }
 
     buildTypes {

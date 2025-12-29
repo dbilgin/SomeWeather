@@ -39,7 +39,7 @@ object WeatherFormatter {
 
     /**
      * Formats wind speed with unit and locale-aware formatting.
-     * API already returns correct units based on units parameter (m/s for metric, mph for imperial).
+     * Open-Meteo API returns correct units based on windspeed_unit parameter (m/s for metric, mph for imperial).
      * @param weather The weather response containing wind data
      * @param unitSystem The unit system (METRIC or IMPERIAL)
      * @param locale The locale for number formatting
@@ -47,17 +47,17 @@ object WeatherFormatter {
      */
     fun formatWindSpeed(weather: WeatherResponse, unitSystem: UnitSystem, locale: Locale): String {
         return if (unitSystem == UnitSystem.METRIC) {
-            // API returns m/s for metric
+            // Open-Meteo returns m/s for metric (when windspeed_unit=ms)
             String.format(locale, "%.2f m/s", weather.wind.speed)
         } else {
-            // API returns mph for imperial
+            // Open-Meteo returns mph for imperial
             String.format(locale, "%.2f mph", weather.wind.speed)
         }
     }
 
     /**
      * Formats wind speed with unit and locale-aware formatting.
-     * API already returns correct units based on units parameter (m/s for metric, mph for imperial).
+     * Open-Meteo API returns correct units based on windspeed_unit parameter (m/s for metric, mph for imperial).
      * @param speed The wind speed (already in correct units from API)
      * @param unitSystem The unit system (METRIC or IMPERIAL)
      * @param locale The locale for number formatting
@@ -65,10 +65,10 @@ object WeatherFormatter {
      */
     fun formatWindSpeed(speed: Double, unitSystem: UnitSystem, locale: Locale): String {
         return if (unitSystem == UnitSystem.METRIC) {
-            // API returns m/s for metric
+            // Open-Meteo returns m/s for metric (when windspeed_unit=ms)
             String.format(locale, "%.2f m/s", speed)
         } else {
-            // API returns mph for imperial
+            // Open-Meteo returns mph for imperial
             String.format(locale, "%.2f mph", speed)
         }
     }
@@ -102,7 +102,7 @@ object WeatherFormatter {
 
     /**
      * Formats visibility distance.
-     * API always returns visibility in meters regardless of units parameter.
+     * Open-Meteo API always returns visibility in meters regardless of unit parameters.
      * @param visibility The visibility in meters
      * @param unitSystem The unit system (METRIC or IMPERIAL)
      * @param locale The locale for number formatting
@@ -124,7 +124,7 @@ object WeatherFormatter {
 
     /**
      * Formats wind gust speed with unit and locale-aware formatting.
-     * API already returns correct units based on units parameter (m/s for metric, mph for imperial).
+     * Open-Meteo API returns correct units based on windspeed_unit parameter (m/s for metric, mph for imperial).
      * @param gust The wind gust speed (already in correct units from API)
      * @param unitSystem The unit system (METRIC or IMPERIAL)
      * @param locale The locale for number formatting
@@ -133,10 +133,10 @@ object WeatherFormatter {
     fun formatWindGust(gust: Double?, unitSystem: UnitSystem, locale: Locale): String? {
         return gust?.let { g ->
             if (unitSystem == UnitSystem.METRIC) {
-                // API returns m/s for metric
+                // Open-Meteo returns m/s for metric (when windspeed_unit=ms)
                 String.format(locale, "%.2f m/s", g)
             } else {
-                // API returns mph for imperial
+                // Open-Meteo returns mph for imperial
                 String.format(locale, "%.2f mph", g)
             }
         }

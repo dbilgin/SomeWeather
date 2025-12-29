@@ -16,8 +16,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.omedacore.someweather.BuildConfig
-import com.omedacore.someweather.data.repository.MobileWeatherRepository
 import com.omedacore.someweather.presentation.screens.CityInputScreen
 import com.omedacore.someweather.presentation.screens.SettingsScreen
 import com.omedacore.someweather.presentation.screens.UnitSystemSelectionScreen
@@ -25,6 +23,7 @@ import com.omedacore.someweather.presentation.screens.WeatherDisplayScreen
 import com.omedacore.someweather.presentation.theme.SomeWeatherTheme
 import com.omedacore.someweather.presentation.viewmodel.MobileWeatherViewModel
 import com.omedacore.someweather.shared.data.local.PreferencesManager
+import com.omedacore.someweather.shared.data.repository.WeatherRepository
 
 class MainActivity : ComponentActivity() {
     private val viewModel: MobileWeatherViewModel by viewModels {
@@ -49,7 +48,6 @@ class MainActivity : ComponentActivity() {
 @androidx.compose.runtime.Composable
 fun MobileApp(viewModel: MobileWeatherViewModel) {
     val uiState by viewModel.uiState.collectAsState()
-    val forecastState by viewModel.forecastState.collectAsState()
     val unitSystemLoaded by viewModel.unitSystemLoaded.collectAsState()
     val unitSystem by viewModel.unitSystem.collectAsState()
     val savedCity by viewModel.savedCity.collectAsState()
@@ -88,7 +86,6 @@ fun MobileApp(viewModel: MobileWeatherViewModel) {
                 WeatherDisplayScreen(
                     viewModel = viewModel,
                     uiState = uiState,
-                    forecastState = forecastState,
                     onCityChange = { showCityInput = true },
                     onSettings = { showSettings = true }
                 )
@@ -113,7 +110,7 @@ class MobileWeatherViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MobileWeatherViewModel::class.java)) {
             val preferencesManager = PreferencesManager(application)
-            val repository = MobileWeatherRepository(preferencesManager, BuildConfig.WEATHER_API_KEY)
+            val repository = WeatherRepository(preferencesManager)
             @Suppress("UNCHECKED_CAST")
             return MobileWeatherViewModel(application, repository) as T
         }

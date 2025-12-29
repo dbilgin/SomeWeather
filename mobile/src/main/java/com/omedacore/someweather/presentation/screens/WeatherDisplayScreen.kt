@@ -10,7 +10,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.omedacore.someweather.presentation.viewmodel.ForecastUiState
 import com.omedacore.someweather.presentation.viewmodel.MobileWeatherViewModel
 import com.omedacore.someweather.presentation.viewmodel.WeatherUiState
 import com.omedacore.someweather.shared.data.model.UnitSystem
@@ -20,7 +19,6 @@ import com.omedacore.someweather.shared.data.model.UnitSystem
 fun WeatherDisplayScreen(
     viewModel: MobileWeatherViewModel,
     uiState: WeatherUiState,
-    forecastState: ForecastUiState,
     onCityChange: () -> Unit,
     onSettings: () -> Unit
 ) {
@@ -76,7 +74,9 @@ fun WeatherDisplayScreen(
                     }
                     item {
                         ForecastSection(
-                            forecastState = forecastState,
+                            forecastItems = uiState.weather.forecastList,
+                            sunrise = uiState.weather.sys.sunrise,
+                            sunset = uiState.weather.sys.sunset,
                             unitSystem = unitSystem ?: UnitSystem.METRIC
                         )
                     }
@@ -84,7 +84,7 @@ fun WeatherDisplayScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                     item {
-                        OpenWeatherAttribution()
+                        WeatherAttribution()
                     }
                 }
             }

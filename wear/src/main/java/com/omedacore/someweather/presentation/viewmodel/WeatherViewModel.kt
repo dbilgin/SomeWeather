@@ -86,7 +86,7 @@ class WeatherViewModel(
             _uiState.value = WeatherUiState.Loading
 
             // Fetch weather data (sunrise/sunset included in response)
-            val weatherResult = repository.getCurrentWeather(city)
+            val weatherResult = repository.getWeather(city)
 
             weatherResult.fold(
                 onSuccess = { weather ->

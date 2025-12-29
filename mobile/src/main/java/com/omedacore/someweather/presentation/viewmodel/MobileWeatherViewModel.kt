@@ -3,10 +3,9 @@ package com.omedacore.someweather.presentation.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.omedacore.someweather.data.model.ForecastResponse
-import com.omedacore.someweather.data.repository.MobileWeatherRepository
 import com.omedacore.someweather.shared.data.model.UnitSystem
 import com.omedacore.someweather.shared.data.model.WeatherResponse
+import com.omedacore.someweather.shared.data.repository.WeatherRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,23 +18,13 @@ sealed class WeatherUiState {
     data class Error(val message: String) : WeatherUiState()
 }
 
-sealed class ForecastUiState {
-    object Initial : ForecastUiState()
-    object Loading : ForecastUiState()
-    data class Success(val forecast: ForecastResponse) : ForecastUiState()
-    data class Error(val message: String) : ForecastUiState()
-}
-
 class MobileWeatherViewModel(
     application: Application,
-    private val repository: MobileWeatherRepository
+    private val repository: WeatherRepository
 ) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow<WeatherUiState>(WeatherUiState.Initial)
     val uiState: StateFlow<WeatherUiState> = _uiState.asStateFlow()
-
-    private val _forecastState = MutableStateFlow<ForecastUiState>(ForecastUiState.Initial)
-    val forecastState: StateFlow<ForecastUiState> = _forecastState.asStateFlow()
 
     private val _savedCity = MutableStateFlow<String?>(null)
     val savedCity: StateFlow<String?> = _savedCity.asStateFlow()
@@ -76,12 +65,10 @@ class MobileWeatherViewModel(
         viewModelScope.launch {
             repository.saveUnitSystem(unitSystem)
             repository.clearWeatherCache()
-            repository.clearForecastCache()
             _unitSystem.value = unitSystem
-            // Refetch weather and forecast with new unit system
+            // Refetch weather with new unit system
             _savedCity.value?.let { city ->
                 fetchWeather(city)
-                fetchForecast(city)
             }
         }
     }
@@ -90,15 +77,13 @@ class MobileWeatherViewModel(
         viewModelScope.launch {
             _uiState.value = WeatherUiState.Loading
 
-            val weatherResult = repository.getCurrentWeather(city)
+            val weatherResult = repository.getWeather(city)
 
             weatherResult.fold(
                 onSuccess = { weather ->
                     repository.saveCity(city)
                     repository.saveCoordinates(weather.coord)
                     _uiState.value = WeatherUiState.Success(weather)
-                    // Also fetch forecast when weather is fetched
-                    fetchForecast(city)
                 },
                 onFailure = {
                     _uiState.value = WeatherUiState.Error(
@@ -109,32 +94,11 @@ class MobileWeatherViewModel(
         }
     }
 
-    fun fetchForecast(city: String) {
-        viewModelScope.launch {
-            _forecastState.value = ForecastUiState.Loading
-
-            val forecastResult = repository.getForecast(city)
-
-            forecastResult.fold(
-                onSuccess = { forecast ->
-                    _forecastState.value = ForecastUiState.Success(forecast)
-                },
-                onFailure = {
-                    _forecastState.value = ForecastUiState.Error(
-                        "An error occurred while fetching forecast data"
-                    )
-                }
-            )
-        }
-    }
-
     fun refreshWeather() {
         viewModelScope.launch {
             repository.clearWeatherCache()
-            repository.clearForecastCache()
             _savedCity.value?.let { city ->
                 fetchWeather(city)
-                fetchForecast(city)
             }
         }
     }
@@ -145,4 +109,3 @@ class MobileWeatherViewModel(
         }
     }
 }
-

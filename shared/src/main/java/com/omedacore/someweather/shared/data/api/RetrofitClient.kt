@@ -9,8 +9,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
-    private const val WEATHER_BASE_URL = "https://api.openweathermap.org/data/2.5/"
-    private const val GEOCODING_BASE_URL = "https://api.openweathermap.org/geo/1.0/"
+    private const val WEATHER_BASE_URL = "https://api.open-meteo.com/v1/"
+    private const val GEOCODING_BASE_URL = "https://geocoding-api.open-meteo.com/v1/"
 
     private val gson: Gson = GsonBuilder()
         .setLenient()
@@ -27,7 +27,7 @@ object RetrofitClient {
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    val weatherRetrofit = Retrofit.Builder()
+    private val weatherRetrofit = Retrofit.Builder()
         .baseUrl(WEATHER_BASE_URL)
         .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create(gson))

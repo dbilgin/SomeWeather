@@ -13,7 +13,6 @@ import androidx.wear.watchface.complications.data.RangedValueComplicationData
 import androidx.wear.watchface.complications.data.ShortTextComplicationData
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
-import com.omedacore.someweather.BuildConfig
 import com.omedacore.someweather.data.util.WeatherIconHelper
 import com.omedacore.someweather.shared.data.local.PreferencesManager
 import com.omedacore.someweather.shared.data.model.UnitSystem
@@ -28,7 +27,7 @@ class WeatherComplicationProviderService : SuspendingComplicationDataSourceServi
 
     private val repository by lazy {
         val preferencesManager = PreferencesManager(applicationContext)
-        WeatherRepository(preferencesManager, BuildConfig.WEATHER_API_KEY)
+        WeatherRepository(preferencesManager)
     }
 
     private fun createTapIntent(): PendingIntent {
@@ -98,7 +97,7 @@ class WeatherComplicationProviderService : SuspendingComplicationDataSourceServi
         val unitSystemFinal = unitSystem ?: UnitSystem.METRIC
 
         // Fetch weather data using repository
-        val weatherResult = repository.getCurrentWeather(city)
+        val weatherResult = repository.getWeather(city)
         val weatherResponse = weatherResult.getOrElse {
             Log.e(TAG, "Error fetching weather for complication", it)
             // Return fallback

@@ -14,18 +14,9 @@ A simple weather application for Android smartphones and Wear OS devices, featur
 ## Setup
 
 1. Clone this repository
-2. Create `key.properties` file at the root
-3. Get your API key from [OpenWeatherMap](https://openweathermap.org/api) and add it to `key.properties`:
-
-   ```
-   WEATHER_API_KEY=your_api_key_here
-   ```
-
-   Note: The app uses OpenWeatherMap's Geocoding API to convert city names to coordinates (no location permissions required).
-
-4. Open the project in Android Studio
-5. Connect a Wear OS device or start an emulator
-6. Build and run the app
+2. Open the project in Android Studio
+3. Connect a Wear OS device or start an emulator
+4. Build and run the app
 
 ## Project Structure
 
@@ -37,7 +28,19 @@ The project consists of:
 
 ## Shared Functionality
 
-- **Current weather display** - Temperature, conditions, and weather icons that adapt to day/night
+- **Weather display** - Temperature, conditions, and weather icons that adapt to day/night
 - **Manual city selection** - Enter any city name manually, no location permissions require
 - **Unit system support** - Switch between metric and imperial units
 - **Astronomy data** - Sunrise and sunset times for your selected location
+
+## Attribution
+
+<a href="https://open-meteo.com/">
+	Weather data by Open-Meteo.com
+</a>
+-
+<a href="https://github.com/open-meteo/open-meteo/blob/main/LICENSE">
+   LICENSE
+</a>
+</br>
+Weather data is cached.

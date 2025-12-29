@@ -5,11 +5,9 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
-import com.omedacore.someweather.BuildConfig
 import com.omedacore.someweather.R
-import com.omedacore.someweather.shared.R as SharedR
-import com.omedacore.someweather.data.repository.MobileWeatherRepository
 import com.omedacore.someweather.data.util.WeatherIconHelper
+import com.omedacore.someweather.shared.data.repository.WeatherRepository
 import com.omedacore.someweather.shared.data.local.PreferencesManager
 import com.omedacore.someweather.shared.data.util.WeatherFormatter
 import kotlinx.coroutines.CoroutineScope
@@ -58,11 +56,11 @@ class WeatherWidgetProvider : AppWidgetProvider() {
         scope.launch {
             try {
                 val preferencesManager = PreferencesManager(context)
-                val repository = MobileWeatherRepository(preferencesManager, BuildConfig.WEATHER_API_KEY)
+                val repository = WeatherRepository(preferencesManager)
                 val city = repository.getSavedCity()
                 
                 if (city != null) {
-                    val weatherResult = repository.getCurrentWeather(city)
+                    val weatherResult = repository.getWeather(city)
                     weatherResult.fold(
                         onSuccess = { weather ->
                             val unitSystem = repository.getUnitSystem() ?: com.omedacore.someweather.shared.data.model.UnitSystem.METRIC
@@ -78,34 +76,25 @@ class WeatherWidgetProvider : AppWidgetProvider() {
                             views.setTextViewText(R.id.widget_temperature, temperature)
                             views.setTextViewText(R.id.widget_condition, condition.description.ifEmpty { condition.main })
                             views.setImageViewResource(R.id.widget_icon, iconResId)
-                            views.setImageViewResource(R.id.widget_openweather_logo, SharedR.drawable.openweather_light)
-                            views.setTextViewText(R.id.widget_openweather_text, "Weather data provided\nby OpenWeather")
                         },
                         onFailure = {
                             views.setTextViewText(R.id.widget_city, "Error")
                             views.setTextViewText(R.id.widget_temperature, "--")
                             views.setTextViewText(R.id.widget_condition, "Unable to load")
-                            views.setImageViewResource(R.id.widget_openweather_logo, SharedR.drawable.openweather_light)
-                            views.setTextViewText(R.id.widget_openweather_text, "Weather data provided\nby OpenWeather")
                         }
                     )
                 } else {
                     views.setTextViewText(R.id.widget_city, "No city set")
                     views.setTextViewText(R.id.widget_temperature, "--")
                     views.setTextViewText(R.id.widget_condition, "Set city in app")
-                    views.setImageViewResource(R.id.widget_openweather_logo, SharedR.drawable.openweather_light)
-                    views.setTextViewText(R.id.widget_openweather_text, "Weather data provided\nby OpenWeather")
                 }
             } catch (_: Exception) {
                 views.setTextViewText(R.id.widget_city, "Error")
                 views.setTextViewText(R.id.widget_temperature, "--")
                 views.setTextViewText(R.id.widget_condition, "Unable to load")
-                views.setImageViewResource(R.id.widget_openweather_logo, SharedR.drawable.openweather_light)
-                views.setTextViewText(R.id.widget_openweather_text, "Weather data provided\nby OpenWeather")
             }
             
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
     }
 }
-

@@ -1,6 +1,7 @@
 package com.omedacore.someweather.presentation.screens
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,20 +19,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.*
 import androidx.wear.remote.interactions.RemoteActivityHelper
-import java.util.concurrent.Executors
-import android.widget.Toast
 import com.omedacore.someweather.data.util.WeatherIconHelper
+import com.omedacore.someweather.presentation.viewmodel.WeatherUiState
+import com.omedacore.someweather.presentation.viewmodel.WeatherViewModel
 import com.omedacore.someweather.shared.data.model.UnitSystem
 import com.omedacore.someweather.shared.data.model.WeatherResponse
 import com.omedacore.someweather.shared.data.util.WeatherFormatter
-import com.omedacore.someweather.presentation.viewmodel.WeatherUiState
-import com.omedacore.someweather.presentation.viewmodel.WeatherViewModel
-import androidx.core.net.toUri
 import java.util.Locale
+import java.util.concurrent.Executors
 
 @Composable
 fun WeatherDisplayScreen(
@@ -198,13 +198,13 @@ fun WeatherContent(
         }
 
         item {
-            OpenWeatherAttribution()
+            WeatherAttribution()
         }
     }
 }
 
 @Composable
-fun OpenWeatherAttribution() {
+fun WeatherAttribution() {
     val context = LocalContext.current
     val remoteActivityHelper = remember {
         RemoteActivityHelper(context, Executors.newSingleThreadExecutor())
@@ -214,14 +214,8 @@ fun OpenWeatherAttribution() {
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
-            painter = painterResource(id = com.omedacore.someweather.shared.R.drawable.openweather_dark),
-            contentDescription = "OpenWeather Logo",
-            modifier = Modifier.size(48.dp)
-        )
-
         Text(
-            text = "Weather data provided by OpenWeather",
+            text = "Weather data by Open-Meteo.com",
             style = MaterialTheme.typography.caption2.copy(
                 color = MaterialTheme.colors.primary,
                 textDecoration = TextDecoration.Underline
@@ -231,10 +225,29 @@ fun OpenWeatherAttribution() {
                 .clickable {
                     val intent = Intent(Intent.ACTION_VIEW)
                         .addCategory(Intent.CATEGORY_BROWSABLE)
-                        .setData("https://openweathermap.org/".toUri())
+                        .setData("https://open-meteo.com/".toUri())
 
                     remoteActivityHelper.startRemoteActivity(intent, null)
-                    Toast.makeText(context, "Check your device", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Check your phone", Toast.LENGTH_SHORT).show()
+                }
+                .padding(vertical = 4.dp)
+        )
+
+        Text(
+            text = "LICENSE",
+            style = MaterialTheme.typography.caption2.copy(
+                color = MaterialTheme.colors.primary,
+                textDecoration = TextDecoration.Underline
+            ),
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .clickable {
+                    val intent = Intent(Intent.ACTION_VIEW)
+                        .addCategory(Intent.CATEGORY_BROWSABLE)
+                        .setData("https://github.com/open-meteo/open-meteo/blob/main/LICENSE".toUri())
+
+                    remoteActivityHelper.startRemoteActivity(intent, null)
+                    Toast.makeText(context, "Check your phone", Toast.LENGTH_SHORT).show()
                 }
                 .padding(vertical = 4.dp)
         )

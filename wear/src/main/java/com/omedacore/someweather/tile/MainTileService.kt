@@ -19,21 +19,16 @@ import androidx.wear.tiles.tooling.preview.TilePreviewData
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import com.google.android.horologist.tiles.SuspendingTileService
-import com.omedacore.someweather.BuildConfig
 import com.omedacore.someweather.R
 import com.omedacore.someweather.shared.data.local.PreferencesManager
-import com.omedacore.someweather.shared.data.model.Coordinates
-import com.omedacore.someweather.shared.data.model.MainWeather
-import com.omedacore.someweather.shared.data.model.SystemInfo
+import com.omedacore.someweather.shared.data.model.CurrentWeatherData
+import com.omedacore.someweather.shared.data.model.DailyWeatherData
 import com.omedacore.someweather.shared.data.model.UnitSystem
-import com.omedacore.someweather.shared.data.model.WeatherCondition
 import com.omedacore.someweather.shared.data.model.WeatherResponse
-import com.omedacore.someweather.shared.data.model.Wind
 import com.omedacore.someweather.shared.data.repository.WeatherRepository
 import com.omedacore.someweather.shared.data.util.WeatherFormatter
 import com.omedacore.someweather.presentation.MainActivity
-import com.omedacore.someweather.shared.data.model.Clouds
-import com.omedacore.someweather.shared.data.model.Precipitation
+import com.omedacore.someweather.shared.data.model.HourlyWeatherData
 
 private const val RESOURCES_VERSION = "0"
 
@@ -46,7 +41,7 @@ class MainTileService : SuspendingTileService() {
 
     private val repository by lazy {
         val preferencesManager = PreferencesManager(applicationContext)
-        WeatherRepository(preferencesManager, BuildConfig.WEATHER_API_KEY)
+        WeatherRepository(preferencesManager)
     }
 
     override suspend fun resourcesRequest(
@@ -60,7 +55,7 @@ class MainTileService : SuspendingTileService() {
         val unitSystem = repository.getUnitSystem() ?: UnitSystem.METRIC
         
         val weather = if (city != null) {
-            repository.getCurrentWeather(city).getOrNull()
+            repository.getWeather(city).getOrNull()
         } else {
             null
         }
@@ -167,8 +162,8 @@ private fun tileLayout(
                 .build()
         )
         .addContent(
-            // OpenWeather attribution text
-            Text.Builder(context, "OpenWeather")
+            // Open-Meteo attribution text
+            Text.Builder(context, "Open-Meteo")
                 .setColor(argb(Colors.DEFAULT.primary))
                 .setTypography(Typography.TYPOGRAPHY_CAPTION3)
                 .build()
@@ -221,41 +216,54 @@ private fun resources(): ResourceBuilders.Resources {
 fun tilePreview(context: Context) = TilePreviewData(
     { _ -> resources() }
 ) { requestParams ->
-    // Create mock weather data for preview
+    // Create mock weather data for preview (Open-Meteo structure)
+    val sunriseTime = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm", java.util.Locale.getDefault())
+        .format(java.util.Date(System.currentTimeMillis() - 3600000))
+    val sunsetTime = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm", java.util.Locale.getDefault())
+        .format(java.util.Date(System.currentTimeMillis() + 3600000))
+    
     val mockWeather = WeatherResponse(
-        coord = Coordinates(lat = 0.0, lon = 0.0),
-        weather = listOf(
-            WeatherCondition(
-                id = 800,
-                main = "Clear",
-                description = "clear sky",
-                icon = "01d"
-            )
+        latitude = 0.0,
+        longitude = 0.0,
+        current = CurrentWeatherData(
+            time = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm", java.util.Locale.getDefault())
+                .format(java.util.Date()),
+            temperature2m = 22.0,
+            relativeHumidity2m = 65.0,
+            weathercode = 0, // Clear sky
+            windSpeed10m = 5.0,
+            windDirection10m = 180,
+            windGusts10m = 7.0,
+            pressureMsl = 1013.0,
+            visibility = 10000.0,
+            isDay = 1
         ),
-        main = MainWeather(
-            temp = 22.0,
-            tempMin = 18.0,
-            tempMax = 26.0,
-            humidity = 65,
-            feelsLike = 4.0,
-            pressure = 1,
-            seaLevel = 3,
-            grndLevel = 2
+        hourly = HourlyWeatherData(
+            time = null,
+            temperature2m = null,
+            relativeHumidity2m = null,
+            weathercode = null,
+            windSpeed10m = null,
+            windDirection10m = null,
+            windGusts10m = null,
+            precipitation = null,
+            precipitationProbability = null
         ),
-        wind = Wind(speed = 5.0, deg = 180, gust = 2.0),
-        sys = SystemInfo(
-            sunrise = System.currentTimeMillis() / 1000 - 3600,
-            sunset = System.currentTimeMillis() / 1000 + 3600,
-            country = "US"
+        daily = DailyWeatherData(
+            time = listOf(java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                .format(java.util.Date())),
+            weathercode = listOf(0),
+            temperature2mMax = listOf(26.0),
+            temperature2mMin = listOf(18.0),
+            sunrise = listOf(sunriseTime),
+            sunset = listOf(sunsetTime)
         ),
-        name = "Sample City",
-        visibility = 3,
-        clouds = Clouds(all = 3),
-        rain = Precipitation(1.0, 4.0),
-        snow = Precipitation(1.0, 4.0),
-        dt = 4,
-        timezone = 3,
-    )
+        timezone = "UTC",
+        timezoneAbbreviation = "UTC",
+        elevation = 0.0
+    ).apply {
+        name = "Sample City"
+    }
     
     val singleTileTimeline = TimelineBuilders.Timeline.Builder()
         .addTimelineEntry(
