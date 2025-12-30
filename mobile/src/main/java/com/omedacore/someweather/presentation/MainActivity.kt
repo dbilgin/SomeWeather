@@ -72,7 +72,7 @@ fun MobileApp(viewModel: MobileWeatherViewModel) {
                     viewModel = viewModel,
                     onCitySelected = { cityResult ->
                         viewModel.saveCity(cityResult)
-                        viewModel.fetchWeather(cityResult.name)
+                        // WeatherDisplayScreen will fetch automatically via LaunchedEffect
                     },
                     onDismiss = {}
                 )
@@ -98,7 +98,7 @@ fun MobileApp(viewModel: MobileWeatherViewModel) {
                 viewModel = viewModel,
                 onCitySelected = { cityResult ->
                     viewModel.saveCity(cityResult)
-                    viewModel.fetchWeather(cityResult.name)
+                    // WeatherDisplayScreen will fetch automatically via LaunchedEffect
                     showCityInput = false
                 },
                 onDismiss = { showCityInput = false }

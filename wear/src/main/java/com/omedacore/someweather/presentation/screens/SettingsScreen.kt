@@ -131,7 +131,7 @@ fun SettingsScreen(
             onCitySelected = { cityResult ->
                 showCityInputDialog = false
                 viewModel.saveCity(cityResult)
-                viewModel.fetchWeather(cityResult.name)
+                // WeatherDisplayScreen will fetch automatically via LaunchedEffect
             },
             onDismiss = { showCityInputDialog = false }
         )

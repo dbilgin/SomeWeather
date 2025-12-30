@@ -107,7 +107,7 @@ fun WearApp(viewModel: WeatherViewModel) {
                             viewModel = viewModel,
                             onCitySelected = { cityResult ->
                                 viewModel.saveCity(cityResult)
-                                viewModel.fetchWeather(cityResult.name)
+                                // WeatherDisplayScreen will fetch automatically via LaunchedEffect
                                 navController.navigate(NavRoutes.WEATHER) {
                                     popUpTo(NavRoutes.CITY_INPUT) { inclusive = true }
                                 }
