@@ -51,6 +51,3 @@ Add a weather widget to your home screen:
 
 <img width="300" alt="AndroidWidget" src="https://github.com/user-attachments/assets/b78d6b7b-0fa1-4582-8e84-099f9ba100ec" />
 
-### Settings
-
-<img width="300" alt="AndroidSettings" src="https://github.com/user-attachments/assets/52f76770-c676-4347-874b-8bb5aee6b426" />
