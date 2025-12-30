@@ -36,8 +36,21 @@ object WeatherIconHelper {
                     R.drawable.clear_night
                 }
             }
-            // Mainly clear (1), Partly cloudy (2)
-            1, 2 -> R.drawable.partly_cloudy
+            // Mainly clear (1), Partly cloudy (2) - use day or night based on actual sunrise/sunset
+            1, 2 -> {
+                val isDay = if (sunrise != null && sunset != null) {
+                    isDayTime(sunrise, sunset)
+                } else {
+                    // Fallback to hour-based check
+                    val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+                    hour in 6..17
+                }
+                if (isDay) {
+                    R.drawable.partly_cloudy
+                } else {
+                    R.drawable.partly_cloudy_night
+                }
+            }
             // Overcast (3)
             3 -> R.drawable.overcast
             // Fog and depositing rime fog (45, 48)
