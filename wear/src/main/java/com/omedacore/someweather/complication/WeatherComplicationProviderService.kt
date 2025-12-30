@@ -7,6 +7,7 @@ import android.os.Build
 import android.util.Log
 import androidx.wear.watchface.complications.data.ComplicationData
 import androidx.wear.watchface.complications.data.ComplicationType
+import androidx.wear.watchface.complications.data.LongTextComplicationData
 import androidx.wear.watchface.complications.data.MonochromaticImage
 import androidx.wear.watchface.complications.data.PlainComplicationText
 import androidx.wear.watchface.complications.data.RangedValueComplicationData
@@ -22,6 +23,9 @@ import com.omedacore.someweather.presentation.MainActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class WeatherComplicationProviderService : SuspendingComplicationDataSourceService() {
 
@@ -77,6 +81,21 @@ class WeatherComplicationProviderService : SuspendingComplicationDataSourceServi
                     .build()
             }
 
+            ComplicationType.LONG_TEXT -> {
+                val calendar = Calendar.getInstance()
+                val dateFormat = SimpleDateFormat("MMM d", Locale.getDefault())
+                val dateText = dateFormat.format(calendar.time)
+
+                LongTextComplicationData.Builder(
+                    text = PlainComplicationText.Builder("22°C").build(),
+                    contentDescription = PlainComplicationText.Builder("Date: $dateText, Temperature: 22°C").build()
+                )
+                    .setTitle(PlainComplicationText.Builder(dateText).build())
+                    .setMonochromaticImage(monochromaticImage)
+                    .setTapAction(tapAction)
+                    .build()
+            }
+
             else -> null
         }
     }
@@ -102,6 +121,11 @@ class WeatherComplicationProviderService : SuspendingComplicationDataSourceServi
             Log.e(TAG, "Error fetching weather for complication", it)
             // Return fallback
             val unit = if (unitSystemFinal == UnitSystem.METRIC) "°C" else "°F"
+            val calendar = Calendar.getInstance()
+            val locale = applicationContext.resources.configuration.locales[0] ?: Locale.getDefault()
+            val dateFormat = SimpleDateFormat("MMM d", locale)
+            val dateText = dateFormat.format(calendar.time)
+            
             return@withContext when (request.complicationType) {
                 ComplicationType.SHORT_TEXT -> {
                     ShortTextComplicationData.Builder(
@@ -109,6 +133,16 @@ class WeatherComplicationProviderService : SuspendingComplicationDataSourceServi
                         contentDescription = PlainComplicationText.Builder("Weather unavailable")
                             .build()
                     )
+                        .build()
+                }
+
+                ComplicationType.LONG_TEXT -> {
+                    LongTextComplicationData.Builder(
+                        text = PlainComplicationText.Builder("--$unit").build(),
+                        contentDescription = PlainComplicationText.Builder("Date: $dateText, Weather unavailable")
+                            .build()
+                    )
+                        .setTitle(PlainComplicationText.Builder(dateText).build())
                         .build()
                 }
 
@@ -157,6 +191,24 @@ class WeatherComplicationProviderService : SuspendingComplicationDataSourceServi
                         .build()
                 )
                     .setText(PlainComplicationText.Builder(temperatureFormatted).build())
+                    .setMonochromaticImage(monochromaticImage)
+                    .setTapAction(tapAction)
+                    .build()
+            }
+
+            ComplicationType.LONG_TEXT -> {
+                // Format date (e.g., "Dec 30" or "Jan 1")
+                val calendar = Calendar.getInstance()
+                val locale = applicationContext.resources.configuration.locales[0] ?: Locale.getDefault()
+                val dateFormat = SimpleDateFormat("MMM d", locale)
+                val dateText = dateFormat.format(calendar.time)
+
+                LongTextComplicationData.Builder(
+                    text = PlainComplicationText.Builder(temperatureFormatted).build(),
+                    contentDescription = PlainComplicationText.Builder("Date: $dateText, Temperature: $temperatureFormatted")
+                        .build()
+                )
+                    .setTitle(PlainComplicationText.Builder(dateText).build())
                     .setMonochromaticImage(monochromaticImage)
                     .setTapAction(tapAction)
                     .build()
