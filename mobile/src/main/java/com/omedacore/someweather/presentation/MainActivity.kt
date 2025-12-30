@@ -69,11 +69,12 @@ fun MobileApp(viewModel: MobileWeatherViewModel) {
             }
             savedCity == null -> {
                 CityInputScreen(
-                    onCityEntered = { city ->
-                        viewModel.saveCity(city)
-                        showCityInput = false
+                    viewModel = viewModel,
+                    onCitySelected = { cityResult ->
+                        viewModel.saveCity(cityResult)
+                        viewModel.fetchWeather(cityResult.name)
                     },
-                    onDismiss = { showCityInput = false }
+                    onDismiss = {}
                 )
             }
             showSettings -> {
@@ -94,8 +95,10 @@ fun MobileApp(viewModel: MobileWeatherViewModel) {
 
         if (showCityInput) {
             CityInputScreen(
-                onCityEntered = { city ->
-                    viewModel.saveCity(city)
+                viewModel = viewModel,
+                onCitySelected = { cityResult ->
+                    viewModel.saveCity(cityResult)
+                    viewModel.fetchWeather(cityResult.name)
                     showCityInput = false
                 },
                 onDismiss = { showCityInput = false }

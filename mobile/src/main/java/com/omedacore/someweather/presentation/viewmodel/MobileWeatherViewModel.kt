@@ -3,6 +3,7 @@ package com.omedacore.someweather.presentation.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.omedacore.someweather.shared.data.model.GeocodingResult
 import com.omedacore.someweather.shared.data.model.UnitSystem
 import com.omedacore.someweather.shared.data.model.WeatherResponse
 import com.omedacore.someweather.shared.data.repository.WeatherRepository
@@ -18,6 +19,14 @@ sealed class WeatherUiState {
     data class Error(val message: String) : WeatherUiState()
 }
 
+sealed class SearchState {
+    object Idle : SearchState()
+    object Loading : SearchState()
+    data class Success(val results: List<GeocodingResult>) : SearchState()
+    object NoResults : SearchState()
+    data class Error(val message: String) : SearchState()
+}
+
 class MobileWeatherViewModel(
     application: Application,
     private val repository: WeatherRepository
@@ -29,11 +38,17 @@ class MobileWeatherViewModel(
     private val _savedCity = MutableStateFlow<String?>(null)
     val savedCity: StateFlow<String?> = _savedCity.asStateFlow()
 
+    private val _savedCityDisplay = MutableStateFlow<String?>(null)
+    val savedCityDisplay: StateFlow<String?> = _savedCityDisplay.asStateFlow()
+
     private val _unitSystem = MutableStateFlow<UnitSystem?>(null)
     val unitSystem: StateFlow<UnitSystem?> = _unitSystem.asStateFlow()
 
     private val _unitSystemLoaded = MutableStateFlow(false)
     val unitSystemLoaded: StateFlow<Boolean> = _unitSystemLoaded.asStateFlow()
+
+    private val _searchState = MutableStateFlow<SearchState>(SearchState.Idle)
+    val searchState: StateFlow<SearchState> = _searchState.asStateFlow()
 
     init {
         loadSavedCity()
@@ -46,6 +61,11 @@ class MobileWeatherViewModel(
                 _savedCity.value = city
             } ?: run {
                 _savedCity.value = null
+            }
+            repository.getSavedCityDisplay()?.let { display ->
+                _savedCityDisplay.value = display
+            } ?: run {
+                _savedCityDisplay.value = _savedCity.value
             }
         }
     }
@@ -103,9 +123,35 @@ class MobileWeatherViewModel(
         }
     }
 
-    fun saveCity(city: String) {
+    fun saveCity(city: GeocodingResult) {
         viewModelScope.launch {
-            _savedCity.value = city
+            _savedCity.value = city.name
+            _savedCityDisplay.value = city.displayLocation
+            repository.saveCityDisplay(city.displayLocation)
         }
+    }
+
+    fun searchCity(query: String) {
+        viewModelScope.launch {
+            _searchState.value = SearchState.Loading
+
+            repository.searchCity(query).fold(
+                onSuccess = { response ->
+                    val results = response.results
+                    if (results.isNullOrEmpty()) {
+                        _searchState.value = SearchState.NoResults
+                    } else {
+                        _searchState.value = SearchState.Success(results)
+                    }
+                },
+                onFailure = {
+                    _searchState.value = SearchState.Error("Failed to search for cities")
+                }
+            )
+        }
+    }
+
+    fun resetSearchState() {
+        _searchState.value = SearchState.Idle
     }
 }

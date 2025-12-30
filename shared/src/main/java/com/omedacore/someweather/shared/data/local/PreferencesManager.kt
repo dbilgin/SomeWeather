@@ -21,6 +21,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 class PreferencesManager(private val context: Context) {
     companion object {
         private val CITY_NAME_KEY = stringPreferencesKey("city_name")
+        private val CITY_DISPLAY_KEY = stringPreferencesKey("city_display")
         private val UNIT_SYSTEM_KEY = stringPreferencesKey("unit_system")
         private val CACHED_WEATHER_KEY = stringPreferencesKey("cached_weather")
         private val CACHED_ASTRONOMY_KEY = stringPreferencesKey("cached_astronomy")
@@ -109,6 +110,22 @@ class PreferencesManager(private val context: Context) {
         } catch (e: Exception) {
             Log.e("Failed getting city", e.message ?: "No message")
             null
+        }
+    }
+
+    suspend fun getSavedCityDisplay(): String? {
+        return try {
+            val prefs = context.dataStore.data.first()
+            prefs[CITY_DISPLAY_KEY]
+        } catch (e: Exception) {
+            Log.e("Failed getting city display", e.message ?: "No message")
+            null
+        }
+    }
+
+    suspend fun saveCityDisplay(display: String) {
+        context.dataStore.edit { preferences ->
+            preferences[CITY_DISPLAY_KEY] = display
         }
     }
 

@@ -20,7 +20,7 @@ fun SettingsScreen(
     BackHandler(onBack = onBack)
     
     val unitSystem by viewModel.unitSystem.collectAsState()
-    val savedCity by viewModel.savedCity.collectAsState()
+    val savedCityDisplay by viewModel.savedCityDisplay.collectAsState()
     var showCityInputDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -57,7 +57,7 @@ fun SettingsScreen(
                         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                     )
                     Text(
-                        text = savedCity ?: "Not set",
+                        text = savedCityDisplay ?: "Not set",
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Button(
@@ -107,10 +107,11 @@ fun SettingsScreen(
 
     if (showCityInputDialog) {
         CityInputScreen(
-            onCityEntered = { city ->
+            viewModel = viewModel,
+            onCitySelected = { cityResult ->
                 showCityInputDialog = false
-                viewModel.saveCity(city)
-                onBack()
+                viewModel.saveCity(cityResult)
+                viewModel.fetchWeather(cityResult.name)
             },
             onDismiss = { showCityInputDialog = false }
         )

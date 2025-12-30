@@ -104,9 +104,10 @@ fun WearApp(viewModel: WeatherViewModel) {
 
                     composable(NavRoutes.CITY_INPUT) {
                         CityInputScreen(
-                            onCityEntered = { city ->
-                                // Save city - WeatherDisplayScreen will fetch weather automatically
-                                viewModel.saveCity(city)
+                            viewModel = viewModel,
+                            onCitySelected = { cityResult ->
+                                viewModel.saveCity(cityResult)
+                                viewModel.fetchWeather(cityResult.name)
                                 navController.navigate(NavRoutes.WEATHER) {
                                     popUpTo(NavRoutes.CITY_INPUT) { inclusive = true }
                                 }

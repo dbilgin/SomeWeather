@@ -91,12 +91,20 @@ class WeatherRepository(
         return preferencesManager.getSavedCity()
     }
 
+    suspend fun getSavedCityDisplay(): String? {
+        return preferencesManager.getSavedCityDisplay()
+    }
+
     suspend fun clearWeatherCache() {
         preferencesManager.clearCachedWeather()
     }
 
     suspend fun saveCity(city: String) {
         preferencesManager.saveCityName(city)
+    }
+
+    suspend fun saveCityDisplay(display: String) {
+        preferencesManager.saveCityDisplay(display)
     }
 
     suspend fun saveCoordinates(coordinates: Coordinates) {

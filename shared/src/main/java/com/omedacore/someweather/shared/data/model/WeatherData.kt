@@ -29,6 +29,8 @@ data class GeocodingResult(
     val country: String,
     @SerializedName("country_code")
     val countryCode: String?,
+    @SerializedName("admin1")
+    val admin1: String?,
     @SerializedName("timezone")
     val timezone: String?,
     @SerializedName("population")
@@ -37,7 +39,10 @@ data class GeocodingResult(
     // Compatibility properties for existing code
     val lat: Double get() = latitude
     val lon: Double get() = longitude
-    val state: String? = null // Open-Meteo doesn't provide state
+    
+    // Display helper: shows "City, State, Country" or "City, Country"
+    val displayLocation: String
+        get() = if (!admin1.isNullOrBlank()) "$name, $admin1, $country" else "$name, $country"
 }
 
 // Open-Meteo Forecast API Response (includes current, hourly, and daily data)

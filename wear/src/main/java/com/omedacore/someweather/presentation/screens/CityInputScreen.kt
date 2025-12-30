@@ -1,32 +1,76 @@
 package com.omedacore.someweather.presentation.screens
 
 import android.view.inputmethod.EditorInfo
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.material.*
+import com.omedacore.someweather.presentation.viewmodel.SearchState
+import com.omedacore.someweather.presentation.viewmodel.WeatherViewModel
+import com.omedacore.someweather.shared.data.model.GeocodingResult
 
 @Composable
 fun CityInputScreen(
-    onCityEntered: (String) -> Unit
+    viewModel: WeatherViewModel,
+    onCitySelected: (GeocodingResult) -> Unit
 ) {
-    CityInputDialog(
-        onDismiss = {},
-        onConfirm = onCityEntered
-    )
+    val searchState by viewModel.searchState.collectAsState()
+    val context = LocalContext.current
+
+    // Handle search state changes
+    LaunchedEffect(searchState) {
+        when (searchState) {
+            is SearchState.NoResults -> {
+                Toast.makeText(context, "No cities found", Toast.LENGTH_SHORT).show()
+                viewModel.resetSearchState()
+            }
+            is SearchState.Error -> {
+                Toast.makeText(context, "Search failed", Toast.LENGTH_SHORT).show()
+                viewModel.resetSearchState()
+            }
+            else -> {}
+        }
+    }
+
+    // Show city selection screen when results are found
+    when (val state = searchState) {
+        is SearchState.Success -> {
+            CitySelectionScreen(
+                cities = state.results,
+                onCitySelected = { cityResult ->
+                    viewModel.resetSearchState()
+                    onCitySelected(cityResult)
+                },
+                onBack = {
+                    viewModel.resetSearchState()
+                }
+            )
+        }
+        else -> {
+            // Show input screen
+            CityInputContent(
+                isLoading = searchState is SearchState.Loading,
+                onSearch = { query ->
+                    viewModel.searchCity(query)
+                }
+            )
+        }
+    }
 }
 
 @Composable
-fun CityInputDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+private fun CityInputContent(
+    isLoading: Boolean,
+    onSearch: (String) -> Unit
 ) {
     var cityInput by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -60,14 +104,15 @@ fun CityInputDialog(
                             hint = "Enter city name"
                             setTextColor(android.graphics.Color.WHITE)
                             setHintTextColor(android.graphics.Color.GRAY)
-                            imeOptions = EditorInfo.IME_ACTION_DONE
+                            imeOptions = EditorInfo.IME_ACTION_SEARCH
+                            isEnabled = !isLoading
                             setOnEditorActionListener { _, actionId, _ ->
-                                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                                if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
                                     val text = text.toString()
                                     if (text.isNotBlank()) {
                                         cityInput = text
                                         keyboardController?.hide()
-                                        onConfirm(cityInput)
+                                        onSearch(cityInput)
                                     }
                                     true
                                 } else {
@@ -96,36 +141,29 @@ fun CityInputDialog(
                 )
             }
 
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+            if (isLoading) {
+                item {
+                    CircularProgressIndicator(
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+            } else {
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button(
-                        onClick = {
-                            keyboardController?.hide()
-                            onDismiss()
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("Cancel")
-                    }
-
+                item {
                     Button(
                         onClick = {
                             if (cityInput.isNotBlank()) {
                                 keyboardController?.hide()
-                                onConfirm(cityInput)
+                                onSearch(cityInput)
                             }
                         },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth(),
                         enabled = cityInput.isNotBlank()
                     ) {
-                        Text("OK")
+                        Text("Search")
                     }
                 }
             }
