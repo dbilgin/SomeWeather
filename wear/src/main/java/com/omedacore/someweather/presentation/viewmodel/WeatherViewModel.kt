@@ -140,6 +140,8 @@ class WeatherViewModel(
             _savedCity.value = city.name
             _savedCityDisplay.value = city.displayLocation
             repository.saveCityDisplay(city.displayLocation)
+            // Immediately fetch weather with new city
+            fetchWeather(city.name)
         }
     }
 

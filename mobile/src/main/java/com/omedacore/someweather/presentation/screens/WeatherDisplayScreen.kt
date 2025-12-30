@@ -24,10 +24,20 @@ fun WeatherDisplayScreen(
 ) {
     val unitSystem by viewModel.unitSystem.collectAsState()
     val savedCity by viewModel.savedCity.collectAsState()
+    val uiStateValue by viewModel.uiState.collectAsState()
 
     LaunchedEffect(savedCity) {
         savedCity?.let { city ->
-            viewModel.fetchWeather(city)
+            val currentState = uiStateValue
+            val shouldFetch = when (currentState) {
+                is WeatherUiState.Initial -> true
+                is WeatherUiState.Loading -> false // Already fetching
+                is WeatherUiState.Success -> currentState.weather.name != city // Different city
+                is WeatherUiState.Error -> true // Retry on error
+            }
+            if (shouldFetch) {
+                viewModel.fetchWeather(city)
+            }
         }
     }
 
