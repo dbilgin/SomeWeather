@@ -6,6 +6,8 @@ A simple weather application for Android smartphones and Wear OS devices, featur
 
 [Android Wearable App](./wear/README.md)
 
+[Backend API](./backend/README.md)
+
 <div>
    <img width="300" alt="AndroidMain1" src="https://github.com/user-attachments/assets/f9e72fee-3907-4c39-a35b-3a40b3163bf0" />
    <img width="300" alt="WearMain" src="https://github.com/user-attachments/assets/e373b719-5203-4897-9120-095c96cebc27" />
@@ -13,10 +15,12 @@ A simple weather application for Android smartphones and Wear OS devices, featur
 
 ## Setup
 
-1. Clone this repository
-2. Open the project in Android Studio
-3. Connect a Wear OS device or start an emulator
-4. Build and run the app
+1. For backend follow the backend [README](/backend/README.md).
+2. Create key.properties file following [key.properties.example](key.properties.example).
+3. Clone this repository
+4. Open the project in Android Studio
+5. Connect a Wear OS device or start an emulator
+6. Build and run the app
 
 ## Project Structure
 
@@ -25,13 +29,7 @@ The project consists of:
 - `:wear` - Wear OS application
 - `:mobile` - Mobile application
 - `:shared` - Shared business logic and data models used by both apps
-
-## Shared Functionality
-
-- **Weather display** - Temperature, conditions, and weather icons that adapt to day/night
-- **Manual city selection** - Enter any city name manually, no location permissions require
-- **Unit system support** - Switch between metric and imperial units
-- **Astronomy data** - Sunrise and sunset times for your selected location
+- `/backend` - Node backend API with PostgreSQL caching
 
 ## Attribution
 
