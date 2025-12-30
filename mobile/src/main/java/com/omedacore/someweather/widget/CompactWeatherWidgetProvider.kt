@@ -10,16 +10,12 @@ import com.omedacore.someweather.data.util.WeatherIconHelper
 import com.omedacore.someweather.shared.data.repository.WeatherRepository
 import com.omedacore.someweather.shared.data.local.PreferencesManager
 import com.omedacore.someweather.shared.data.util.WeatherFormatter
-import com.omedacore.someweather.shared.R as SharedR
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
-class WeatherWidgetProvider : AppWidgetProvider() {
+class CompactWeatherWidgetProvider : AppWidgetProvider() {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     override fun onUpdate(
@@ -45,7 +41,7 @@ class WeatherWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetId: Int
     ) {
-        val views = RemoteViews(context.packageName, R.layout.weather_widget)
+        val views = RemoteViews(context.packageName, R.layout.weather_widget_compact)
         
         // Set click intent to open app
         val intent = Intent(context, com.omedacore.someweather.presentation.MainActivity::class.java)
@@ -76,55 +72,26 @@ class WeatherWidgetProvider : AppWidgetProvider() {
                                 weather.sys.sunset
                             )
 
-                            // Format sunrise/sunset times
-                            val locale = context.resources.configuration.locales[0] ?: Locale.getDefault()
-                            val timeFormat = SimpleDateFormat("HH:mm", locale)
-                            val sunriseTime = if (weather.sys.sunrise > 0) {
-                                timeFormat.format(Date(weather.sys.sunrise * 1000))
-                            } else "--:--"
-                            val sunsetTime = if (weather.sys.sunset > 0) {
-                                timeFormat.format(Date(weather.sys.sunset * 1000))
-                            } else "--:--"
-
-                            views.setTextViewText(R.id.widget_city, weather.name)
                             views.setTextViewText(R.id.widget_temperature, temperature)
-                            views.setTextViewText(R.id.widget_condition, condition.description.ifEmpty { condition.main })
                             views.setImageViewResource(R.id.widget_icon, iconResId)
-                            views.setImageViewResource(R.id.widget_sunrise_icon, SharedR.drawable.clear_day)
-                            views.setTextViewText(R.id.widget_sunrise_time, sunriseTime)
-                            views.setImageViewResource(R.id.widget_sunset_icon, SharedR.drawable.clear_night)
-                            views.setTextViewText(R.id.widget_sunset_time, sunsetTime)
+                            views.setTextViewText(R.id.widget_attribution_text, "Weather data by Open-Meteo.com")
                         },
                         onFailure = {
-                            views.setTextViewText(R.id.widget_city, "Error")
                             views.setTextViewText(R.id.widget_temperature, "--")
-                            views.setTextViewText(R.id.widget_condition, "Unable to load")
-                            views.setImageViewResource(R.id.widget_sunrise_icon, SharedR.drawable.clear_day)
-                            views.setTextViewText(R.id.widget_sunrise_time, "--:--")
-                            views.setImageViewResource(R.id.widget_sunset_icon, SharedR.drawable.clear_night)
-                            views.setTextViewText(R.id.widget_sunset_time, "--:--")
+                            views.setTextViewText(R.id.widget_attribution_text, "Weather data by Open-Meteo.com")
                         }
                     )
                 } else {
-                    views.setTextViewText(R.id.widget_city, "No city set")
                     views.setTextViewText(R.id.widget_temperature, "--")
-                    views.setTextViewText(R.id.widget_condition, "Set city in app")
-                    views.setImageViewResource(R.id.widget_sunrise_icon, SharedR.drawable.clear_day)
-                    views.setTextViewText(R.id.widget_sunrise_time, "--:--")
-                    views.setImageViewResource(R.id.widget_sunset_icon, SharedR.drawable.clear_night)
-                    views.setTextViewText(R.id.widget_sunset_time, "--:--")
+                    views.setTextViewText(R.id.widget_attribution_text, "Weather data by Open-Meteo.com")
                 }
             } catch (_: Exception) {
-                views.setTextViewText(R.id.widget_city, "Error")
                 views.setTextViewText(R.id.widget_temperature, "--")
-                views.setTextViewText(R.id.widget_condition, "Unable to load")
-                views.setImageViewResource(R.id.widget_sunrise_icon, SharedR.drawable.clear_day)
-                views.setTextViewText(R.id.widget_sunrise_time, "--:--")
-                views.setImageViewResource(R.id.widget_sunset_icon, SharedR.drawable.clear_night)
-                views.setTextViewText(R.id.widget_sunset_time, "--:--")
+                views.setTextViewText(R.id.widget_attribution_text, "Weather data by Open-Meteo.com")
             }
             
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
     }
 }
+

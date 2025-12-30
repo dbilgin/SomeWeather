@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Some Weather</string>
     <string name="widget_description">Current weather information</string>
+    <string name="widget_compact_description">Compact weather temperature</string>
 </resources>
