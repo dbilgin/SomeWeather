@@ -1,0 +1,5 @@
+# Weather API key for authorization (X-API-Key header)
+WEATHER_API_KEY=YOUR_API_KEY_HERE
+
+# Backend API base URL
+BASE_URL=YOUR_BASE_URL_HERE

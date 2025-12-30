@@ -2,6 +2,7 @@ package com.omedacore.someweather.shared.data.api
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -9,8 +10,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
-    private const val WEATHER_BASE_URL = "https://api.open-meteo.com/v1/"
-    private const val GEOCODING_BASE_URL = "https://geocoding-api.open-meteo.com/v1/"
+    private var baseUrl: String = ""
+    private var weatherApiKey: String = ""
+    private var isInitialized = false
 
     private val gson: Gson = GsonBuilder()
         .setLenient()
@@ -20,26 +22,58 @@ object RetrofitClient {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
-    private val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor(loggingInterceptor)
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
-        .build()
+    /**
+     * Initialize the RetrofitClient with backend configuration.
+     * Must be called before using the API clients.
+     */
+    fun initialize(baseUrl: String, apiKey: String) {
+        this.baseUrl = if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/"
+        weatherApiKey = apiKey
+        isInitialized = true
+    }
 
-    private val weatherRetrofit = Retrofit.Builder()
-        .baseUrl(WEATHER_BASE_URL)
-        .client(okHttpClient)
-        .addConverterFactory(GsonConverterFactory.create(gson))
-        .build()
+    private fun createApiKeyInterceptor(): Interceptor {
+        return Interceptor { chain ->
+            val original = chain.request()
+            val request = original.newBuilder()
+                .header("X-API-Key", weatherApiKey)
+                .header("Content-Type", "application/json")
+                .method(original.method, original.body)
+                .build()
+            chain.proceed(request)
+        }
+    }
 
-    private val geocodingRetrofit = Retrofit.Builder()
-        .baseUrl(GEOCODING_BASE_URL)
-        .client(okHttpClient)
-        .addConverterFactory(GsonConverterFactory.create(gson))
-        .build()
+    private fun createOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .addInterceptor(createApiKeyInterceptor())
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+    }
 
-    val weatherAPI: WeatherAPI = weatherRetrofit.create(WeatherAPI::class.java)
-    val geocodingAPI: GeocodingAPI = geocodingRetrofit.create(GeocodingAPI::class.java)
+    private fun getBaseUrl(): String {
+        check(isInitialized) { "RetrofitClient must be initialized before use" }
+        return baseUrl
+    }
+
+    val weatherAPI: WeatherAPI by lazy {
+        Retrofit.Builder()
+            .baseUrl(getBaseUrl())
+            .client(createOkHttpClient())
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+            .create(WeatherAPI::class.java)
+    }
+
+    val citySearchAPI: CitySearchAPI by lazy {
+        Retrofit.Builder()
+            .baseUrl(getBaseUrl())
+            .client(createOkHttpClient())
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+            .create(CitySearchAPI::class.java)
+    }
 }
-

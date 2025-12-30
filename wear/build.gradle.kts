@@ -4,6 +4,16 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+import java.util.Properties
+import java.io.FileInputStream
+
+// Load key.properties
+val keyPropertiesFile = rootProject.file("key.properties")
+val keyProperties = Properties()
+if (keyPropertiesFile.exists()) {
+    keyProperties.load(FileInputStream(keyPropertiesFile))
+}
+
 android {
     namespace = "com.omedacore.someweather"
     compileSdk {
@@ -16,6 +26,10 @@ android {
         targetSdk = 36
         versionCode = 3
         versionName = "1.2"
+
+        // Backend configuration
+        buildConfigField("String", "BASE_URL", "\"${keyProperties.getProperty("BASE_URL", "")}\"")
+        buildConfigField("String", "WEATHER_API_KEY", "\"${keyProperties.getProperty("WEATHER_API_KEY", "")}\"")
     }
 
     buildTypes {
