@@ -40,14 +40,13 @@ View detailed weather forecasts for the next 5 days:
 
 <img width="300" alt="AndroidForecast" src="https://github.com/user-attachments/assets/dff85582-5ee6-41d3-b156-850973ce0aa2" />
 
-### Widget
+### Widgets
 
-Add a weather widget to your home screen:
+Add a weather widgets to your home screen:
 
-- Displays current city, temperature, and condition
+- Display basic data
 - Compact design optimized for home screen
 - Tap to open the main app
-- Automatically updates (configurable via `updatePeriodMillis` in `weather_widget_info.xml`)
+- Automatically updates (configurable via `updatePeriodMillis`)
 
-<img width="300" alt="AndroidWidget" src="https://github.com/user-attachments/assets/b78d6b7b-0fa1-4582-8e84-099f9ba100ec" />
-
+<img width="300" alt="AndroidWidgets" src="https://github.com/user-attachments/assets/515a92f9-6230-4aed-97dd-be2e4c544b9e" />
