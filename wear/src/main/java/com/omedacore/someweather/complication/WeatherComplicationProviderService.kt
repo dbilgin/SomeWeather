@@ -20,6 +20,7 @@ import com.omedacore.someweather.shared.data.model.UnitSystem
 import com.omedacore.someweather.shared.data.repository.WeatherRepository
 import com.omedacore.someweather.shared.data.util.WeatherFormatter
 import com.omedacore.someweather.presentation.MainActivity
+import com.omedacore.someweather.shared.data.util.DateData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
@@ -77,6 +78,7 @@ class WeatherComplicationProviderService : SuspendingComplicationDataSourceServi
                 )
                     .setText(PlainComplicationText.Builder("22°C").build())
                     .setMonochromaticImage(monochromaticImage)
+                    .setTitle(PlainComplicationText.Builder("FEB 04").build())
                     .setTapAction(tapAction)
                     .build()
             }
@@ -169,12 +171,13 @@ class WeatherComplicationProviderService : SuspendingComplicationDataSourceServi
         val tapAction = createTapIntent()
 
         Log.d(TAG, "Updating complication ${request.complicationType}")
+        val dateText = DateData.getComplicationDate(applicationContext)
         when (request.complicationType) {
             ComplicationType.SHORT_TEXT -> {
                 ShortTextComplicationData.Builder(
                     text = PlainComplicationText.Builder(temperatureFormatted).build(),
                     contentDescription = PlainComplicationText.Builder("Temperature: $temperatureFormatted")
-                        .build()
+                        .build(),
                 )
                     .setMonochromaticImage(monochromaticImage)
                     .setTapAction(tapAction)
@@ -191,17 +194,12 @@ class WeatherComplicationProviderService : SuspendingComplicationDataSourceServi
                 )
                     .setText(PlainComplicationText.Builder(temperatureFormatted).build())
                     .setMonochromaticImage(monochromaticImage)
+                    .setTitle(PlainComplicationText.Builder(dateText).build())
                     .setTapAction(tapAction)
                     .build()
             }
 
             ComplicationType.LONG_TEXT -> {
-                // Format date (e.g., "Dec 30" or "Jan 1")
-                val calendar = Calendar.getInstance()
-                val locale = applicationContext.resources.configuration.locales[0] ?: Locale.getDefault()
-                val dateFormat = SimpleDateFormat("MMM d", locale)
-                val dateText = dateFormat.format(calendar.time)
-
                 LongTextComplicationData.Builder(
                     text = PlainComplicationText.Builder(temperatureFormatted).build(),
                     contentDescription = PlainComplicationText.Builder("Date: $dateText, Temperature: $temperatureFormatted")
