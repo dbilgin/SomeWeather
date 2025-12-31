@@ -274,9 +274,7 @@ fun tilePreview(context: Context) = TilePreviewData(
         timezone = "UTC",
         timezoneAbbreviation = "UTC",
         elevation = 0.0
-    ).apply {
-        name = "Sample City"
-    }
+    )
     
     val singleTileTimeline = TimelineBuilders.Timeline.Builder()
         .addTimelineEntry(

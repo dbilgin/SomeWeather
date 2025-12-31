@@ -134,7 +134,8 @@ class WeatherWidgetProvider : AppWidgetProvider() {
                                 timeFormat.format(Date(weather.sys.sunset * 1000))
                             } else "--:--"
 
-                            views.setTextViewText(R.id.widget_city, weather.name)
+                            val cityName = repository.getSavedCity() ?: ""
+                            views.setTextViewText(R.id.widget_city, cityName)
                             views.setTextViewText(R.id.widget_temperature, temperature)
                             views.setTextViewText(R.id.widget_condition, condition.description.ifEmpty { condition.main })
                             views.setImageViewResource(R.id.widget_icon, iconResId)

@@ -102,8 +102,6 @@ data class WeatherResponse(
             country = "" // Not available in Open-Meteo current response
         )
     
-    var name: String = "" // Set from geocoding result
-    
     val visibility: Int?
         get() = current.visibility?.toInt()
     
@@ -165,18 +163,6 @@ data class WeatherResponse(
                 )
             }
         }
-
-    val forecastCity: ForecastCity
-        get() = ForecastCity(
-            id = 0,
-            name = name,
-            coord = Coordinates(latitude, longitude),
-            country = "",
-            population = null,
-            timezone = 0,
-            sunrise = sys.sunrise,
-            sunset = sys.sunset
-        )
 }
 
 data class CurrentWeatherData(
@@ -385,7 +371,6 @@ object WmoWeatherCodes {
     }
 }
 
-
 data class ForecastItem(
     val dt: Long,
     val dtTxt: String,
@@ -399,14 +384,4 @@ data class ForecastItem(
     val snow: Precipitation?
 )
 
-data class ForecastCity(
-    val id: Int,
-    val name: String,
-    val coord: Coordinates,
-    val country: String,
-    val population: Int?,
-    val timezone: Int,
-    val sunrise: Long,
-    val sunset: Long
-)
 
