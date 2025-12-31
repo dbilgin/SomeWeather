@@ -4,7 +4,6 @@ import com.omedacore.someweather.shared.data.api.GetWeatherRequest
 import com.omedacore.someweather.shared.data.api.RetrofitClient
 import com.omedacore.someweather.shared.data.api.SearchCityRequest
 import com.omedacore.someweather.shared.data.local.PreferencesManager
-import com.omedacore.someweather.shared.data.model.Coordinates
 import com.omedacore.someweather.shared.data.model.GeocodingResponse
 import com.omedacore.someweather.shared.data.model.UnitSystem
 import com.omedacore.someweather.shared.data.model.WeatherResponse
