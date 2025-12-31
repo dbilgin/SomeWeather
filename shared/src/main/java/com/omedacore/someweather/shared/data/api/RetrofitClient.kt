@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit
 object RetrofitClient {
     private var baseUrl: String = ""
     private var weatherApiKey: String = ""
+    private var useOpenMeteo: Boolean = false
     private var isInitialized = false
 
     private val gson: Gson = GsonBuilder()
@@ -23,12 +24,15 @@ object RetrofitClient {
     }
 
     /**
-     * Initialize the RetrofitClient with backend configuration.
+     * Initialize the RetrofitClient with backend or Open-Meteo configuration.
      * Must be called before using the API clients.
      */
-    fun initialize(baseUrl: String, apiKey: String) {
-        this.baseUrl = if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/"
-        weatherApiKey = apiKey
+    fun initialize(useOpenMeteo: Boolean, baseUrl: String = "", apiKey: String = "") {
+        this.useOpenMeteo = useOpenMeteo
+        if (!useOpenMeteo) {
+            this.baseUrl = if (baseUrl.endsWith("/")) baseUrl else "$baseUrl/"
+            this.weatherApiKey = apiKey
+        }
         isInitialized = true
     }
 
@@ -44,10 +48,19 @@ object RetrofitClient {
         }
     }
 
-    private fun createOkHttpClient(): OkHttpClient {
+    private fun createBackendOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
             .addInterceptor(createApiKeyInterceptor())
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+    }
+
+    private fun createOpenMeteoOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
@@ -60,20 +73,42 @@ object RetrofitClient {
     }
 
     val weatherAPI: WeatherAPI by lazy {
+        check(!useOpenMeteo) { "Cannot use backend API when Open-Meteo mode is enabled" }
         Retrofit.Builder()
             .baseUrl(getBaseUrl())
-            .client(createOkHttpClient())
+            .client(createBackendOkHttpClient())
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
             .create(WeatherAPI::class.java)
     }
 
     val citySearchAPI: CitySearchAPI by lazy {
+        check(!useOpenMeteo) { "Cannot use backend API when Open-Meteo mode is enabled" }
         Retrofit.Builder()
             .baseUrl(getBaseUrl())
-            .client(createOkHttpClient())
+            .client(createBackendOkHttpClient())
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
             .create(CitySearchAPI::class.java)
+    }
+
+    val openMeteoWeatherAPI: OpenMeteoWeatherAPI by lazy {
+        check(useOpenMeteo) { "Cannot use Open-Meteo API when backend mode is enabled" }
+        Retrofit.Builder()
+            .baseUrl("https://api.open-meteo.com/")
+            .client(createOpenMeteoOkHttpClient())
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+            .create(OpenMeteoWeatherAPI::class.java)
+    }
+
+    val openMeteoGeocodingAPI: OpenMeteoGeocodingAPI by lazy {
+        check(useOpenMeteo) { "Cannot use Open-Meteo API when backend mode is enabled" }
+        Retrofit.Builder()
+            .baseUrl("https://geocoding-api.open-meteo.com/")
+            .client(createOpenMeteoOkHttpClient())
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+            .create(OpenMeteoGeocodingAPI::class.java)
     }
 }

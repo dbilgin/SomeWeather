@@ -21,6 +21,7 @@ import com.omedacore.someweather.presentation.screens.SettingsScreen
 import com.omedacore.someweather.presentation.screens.UnitSystemSelectionScreen
 import com.omedacore.someweather.presentation.screens.WeatherDisplayScreen
 import com.omedacore.someweather.presentation.theme.SomeWeatherTheme
+import com.omedacore.someweather.BuildConfig
 import com.omedacore.someweather.presentation.viewmodel.MobileWeatherViewModel
 import com.omedacore.someweather.shared.data.local.PreferencesManager
 import com.omedacore.someweather.shared.data.repository.WeatherRepository
@@ -113,7 +114,7 @@ class MobileWeatherViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MobileWeatherViewModel::class.java)) {
             val preferencesManager = PreferencesManager(application)
-            val repository = WeatherRepository(preferencesManager)
+            val repository = WeatherRepository(preferencesManager, BuildConfig.USE_OPENMETEO)
             @Suppress("UNCHECKED_CAST")
             return MobileWeatherViewModel(application, repository) as T
         }

@@ -19,6 +19,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.wear.compose.material.CircularProgressIndicator
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.TimeText
+import com.omedacore.someweather.BuildConfig
 import com.omedacore.someweather.shared.data.local.PreferencesManager
 import com.omedacore.someweather.shared.data.repository.WeatherRepository
 import com.omedacore.someweather.presentation.screens.CityInputScreen
@@ -149,7 +150,7 @@ class WeatherViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(WeatherViewModel::class.java)) {
             val preferencesManager = PreferencesManager(application)
-            val repository = WeatherRepository(preferencesManager)
+            val repository = WeatherRepository(preferencesManager, BuildConfig.USE_OPENMETEO)
             @Suppress("UNCHECKED_CAST")
             return WeatherViewModel(application, repository) as T
         }

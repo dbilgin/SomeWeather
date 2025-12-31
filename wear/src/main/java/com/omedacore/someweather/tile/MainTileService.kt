@@ -41,7 +41,7 @@ class MainTileService : SuspendingTileService() {
 
     private val repository by lazy {
         val preferencesManager = PreferencesManager(applicationContext)
-        WeatherRepository(preferencesManager)
+        WeatherRepository(preferencesManager, com.omedacore.someweather.BuildConfig.USE_OPENMETEO)
     }
 
     override suspend fun resourcesRequest(

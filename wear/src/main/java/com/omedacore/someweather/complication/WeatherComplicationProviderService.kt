@@ -31,7 +31,7 @@ class WeatherComplicationProviderService : SuspendingComplicationDataSourceServi
 
     private val repository by lazy {
         val preferencesManager = PreferencesManager(applicationContext)
-        WeatherRepository(preferencesManager)
+        WeatherRepository(preferencesManager, com.omedacore.someweather.BuildConfig.USE_OPENMETEO)
     }
 
     private fun createTapIntent(): PendingIntent {

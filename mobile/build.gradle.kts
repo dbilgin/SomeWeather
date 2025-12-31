@@ -28,10 +28,23 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
 
-        // Backend configuration
-        buildConfigField("String", "BASE_URL", "\"${keyProperties.getProperty("BASE_URL", "")}\"")
-        buildConfigField("String", "WEATHER_API_KEY", "\"${keyProperties.getProperty("WEATHER_API_KEY", "")}\"")
+    flavorDimensions += "api"
+
+    productFlavors {
+        create("default") {
+            dimension = "api"
+            buildConfigField("String", "BASE_URL", "\"${keyProperties.getProperty("BASE_URL", "")}\"")
+            buildConfigField("String", "WEATHER_API_KEY", "\"${keyProperties.getProperty("WEATHER_API_KEY", "")}\"")
+            buildConfigField("boolean", "USE_OPENMETEO", "false")
+        }
+        create("openmeteo") {
+            dimension = "api"
+            buildConfigField("String", "BASE_URL", "\"\"")
+            buildConfigField("String", "WEATHER_API_KEY", "\"\"")
+            buildConfigField("boolean", "USE_OPENMETEO", "true")
+        }
     }
 
     buildTypes {
@@ -43,6 +56,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11

@@ -56,7 +56,7 @@ class CompactWeatherWidgetProvider : AppWidgetProvider() {
         scope.launch {
             try {
                 val preferencesManager = PreferencesManager(context)
-                val repository = WeatherRepository(preferencesManager)
+                val repository = WeatherRepository(preferencesManager, com.omedacore.someweather.BuildConfig.USE_OPENMETEO)
                 val coords = repository.getSelectedCityCoordinates()
                 val unitSystem = repository.getUnitSystem() ?: com.omedacore.someweather.shared.data.model.UnitSystem.METRIC
                 

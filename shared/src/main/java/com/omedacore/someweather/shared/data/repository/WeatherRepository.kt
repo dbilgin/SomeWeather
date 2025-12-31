@@ -12,21 +12,28 @@ import com.omedacore.someweather.shared.data.util.WeatherApiParams
 import com.omedacore.someweather.shared.data.util.UnitConverter
 
 class WeatherRepository(
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    private val useOpenMeteo: Boolean = false
 ) {
-    private val weatherAPI = RetrofitClient.weatherAPI
-    private val citySearchAPI = RetrofitClient.citySearchAPI
+    private val weatherAPI by lazy { RetrofitClient.weatherAPI }
+    private val citySearchAPI by lazy { RetrofitClient.citySearchAPI }
+    private val openMeteoWeatherAPI by lazy { RetrofitClient.openMeteoWeatherAPI }
+    private val openMeteoGeocodingAPI by lazy { RetrofitClient.openMeteoGeocodingAPI }
     private val LOCAL_CACHE_DURATION_MS = 5 * 60 * 1000L // 5 minutes local cache
 
     /**
      * Search for cities by name.
-     * Results are cached permanently on the backend.
+     * Results are cached permanently on the backend (if using backend mode).
      */
     suspend fun searchCity(query: String): Result<GeocodingResponse> {
         return try {
-            val response = citySearchAPI.searchCity(
-                SearchCityRequest(query = query, count = 5)
-            )
+            val response = if (useOpenMeteo) {
+                openMeteoGeocodingAPI.searchCity(name = query, count = 5)
+            } else {
+                citySearchAPI.searchCity(
+                    SearchCityRequest(query = query, count = 5)
+                )
+            }
             Result.success(response)
         } catch (e: Exception) {
             Result.failure(e)
@@ -67,21 +74,35 @@ class WeatherRepository(
         val dailyParams = WeatherApiParams.getDailyParams()
         val timezone = WeatherApiParams.getTimezone()
 
-        // Fetch from backend (which caches for 30 min)
+        // Fetch from API (backend caches for 30 min, Open-Meteo has no backend cache)
         return try {
-            val response = weatherAPI.getWeather(
-                GetWeatherRequest(
+            val response = if (useOpenMeteo) {
+                openMeteoWeatherAPI.getWeather(
                     latitude = lat,
                     longitude = lon,
-                    temperatureUnit = temperatureUnit,
-                    windspeedUnit = windspeedUnit,
-                    precipitationUnit = precipitationUnit,
                     current = currentParams,
                     hourly = hourlyParams,
                     daily = dailyParams,
+                    temperatureUnit = temperatureUnit,
+                    windspeedUnit = windspeedUnit,
+                    precipitationUnit = precipitationUnit,
                     timezone = timezone
                 )
-            )
+            } else {
+                weatherAPI.getWeather(
+                    GetWeatherRequest(
+                        latitude = lat,
+                        longitude = lon,
+                        temperatureUnit = temperatureUnit,
+                        windspeedUnit = windspeedUnit,
+                        precipitationUnit = precipitationUnit,
+                        current = currentParams,
+                        hourly = hourlyParams,
+                        daily = dailyParams,
+                        timezone = timezone
+                    )
+                )
+            }
 
             // Save coordinates for cache verification
             preferencesManager.saveCachedCoordinates(response.latitude, response.longitude)
