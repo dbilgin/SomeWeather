@@ -64,14 +64,15 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
       `Fetching weather for coordinates: ${latitude}, ${longitude}, units: ${temperature_unit}/${windspeed_unit}/${precipitation_unit}`
     );
 
-    // Create cache key from coordinates and all unit parameters
+    // Create cache key from coordinates
     const cacheKey = `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
-    const unitsKey = `${temperature_unit}_${windspeed_unit}_${precipitation_unit}`;
+    // Create params key from all parameters (including static ones for future-proofing)
+    const paramsKey = `${temperature_unit}_${windspeed_unit}_${precipitation_unit}_${current}_${hourly}_${daily}_${timezone}`;
 
     // Check cache
     const cacheResult = await pool.query(
       "SELECT * FROM weather_cache WHERE city = $1 AND units = $2 LIMIT 1",
-      [cacheKey, unitsKey]
+      [cacheKey, paramsKey]
     );
 
     if (cacheResult.rows.length > 0) {
@@ -128,7 +129,7 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
          DO UPDATE SET data = $3, updated_at = $4`,
         [
           cacheKey,
-          unitsKey,
+          paramsKey,
           JSON.stringify(weatherData),
           new Date().toISOString(),
         ]

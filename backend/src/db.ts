@@ -12,7 +12,7 @@ export async function initDatabase(): Promise<void> {
       CREATE TABLE IF NOT EXISTS weather_cache (
         id SERIAL PRIMARY KEY,
         city VARCHAR(255) NOT NULL,
-        units VARCHAR(10) NOT NULL,
+        units VARCHAR(500) NOT NULL,
         data TEXT NOT NULL,
         updated_at TIMESTAMP NOT NULL,
         UNIQUE(city, units)
@@ -36,4 +36,3 @@ export async function initDatabase(): Promise<void> {
 }
 
 export default pool;
-
