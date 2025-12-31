@@ -8,6 +8,7 @@ import com.omedacore.someweather.shared.data.model.Coordinates
 import com.omedacore.someweather.shared.data.model.GeocodingResponse
 import com.omedacore.someweather.shared.data.model.UnitSystem
 import com.omedacore.someweather.shared.data.model.WeatherResponse
+import com.omedacore.someweather.shared.data.util.UnitConverter
 
 class WeatherRepository(
     private val preferencesManager: PreferencesManager
@@ -54,16 +55,21 @@ class WeatherRepository(
             }
         }
 
-        // Get unit system for API call
-        val units = when (unitSystem) {
-            UnitSystem.METRIC -> "metric"
-            UnitSystem.IMPERIAL -> "imperial"
-        }
+        // Convert unit system to Open-Meteo unit parameters
+        val temperatureUnit = UnitConverter.convertTemperatureUnit(unitSystem)
+        val windspeedUnit = UnitConverter.convertWindspeedUnit(unitSystem)
+        val precipitationUnit = UnitConverter.convertPrecipitationUnit(unitSystem)
 
         // Fetch from backend (which caches for 30 min)
         return try {
             val response = weatherAPI.getWeather(
-                GetWeatherRequest(latitude = lat, longitude = lon, units = units)
+                GetWeatherRequest(
+                    latitude = lat,
+                    longitude = lon,
+                    temperatureUnit = temperatureUnit,
+                    windspeedUnit = windspeedUnit,
+                    precipitationUnit = precipitationUnit
+                )
             )
 
             // Save coordinates for cache verification

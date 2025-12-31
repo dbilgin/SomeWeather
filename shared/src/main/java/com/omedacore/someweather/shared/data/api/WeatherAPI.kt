@@ -11,7 +11,9 @@ import retrofit2.http.POST
 data class GetWeatherRequest(
     val latitude: Double,
     val longitude: Double,
-    val units: String = "metric"
+    val temperatureUnit: String,
+    val windspeedUnit: String,
+    val precipitationUnit: String
 )
 
 /**

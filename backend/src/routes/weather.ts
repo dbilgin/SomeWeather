@@ -9,7 +9,9 @@ const CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minutes
 interface WeatherRequestBody {
   latitude?: number;
   longitude?: number;
-  units?: "metric" | "imperial";
+  temperature_unit?: "celsius" | "fahrenheit";
+  windspeed_unit?: "ms" | "mph";
+  precipitation_unit?: "mm" | "inch";
 }
 
 interface WeatherData {
@@ -23,7 +25,13 @@ interface WeatherData {
 router.post("/", async (req: Request, res: Response): Promise<void> => {
   try {
     const body: WeatherRequestBody = req.body;
-    const { latitude, longitude, units = "metric" } = body;
+    const {
+      latitude,
+      longitude,
+      temperature_unit = "celsius",
+      windspeed_unit = "ms",
+      precipitation_unit = "mm",
+    } = body;
 
     if (latitude === undefined || longitude === undefined) {
       res.status(400).json({
@@ -33,17 +41,31 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    if (
+      temperature_unit === undefined ||
+      windspeed_unit === undefined ||
+      precipitation_unit === undefined
+    ) {
+      res.status(400).json({
+        error: "Bad Request",
+        message:
+          "temperature_unit, windspeed_unit, and precipitation_unit parameters are required",
+      });
+      return;
+    }
+
     console.log(
-      `Fetching weather for coordinates: ${latitude}, ${longitude}, units: ${units}`
+      `Fetching weather for coordinates: ${latitude}, ${longitude}, units: ${temperature_unit}/${windspeed_unit}/${precipitation_unit}`
     );
 
-    // Create cache key from coordinates and units
+    // Create cache key from coordinates and all unit parameters
     const cacheKey = `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
+    const unitsKey = `${temperature_unit}_${windspeed_unit}_${precipitation_unit}`;
 
     // Check cache
     const cacheResult = await pool.query(
       "SELECT * FROM weather_cache WHERE city = $1 AND units = $2 LIMIT 1",
-      [cacheKey, units]
+      [cacheKey, unitsKey]
     );
 
     if (cacheResult.rows.length > 0) {
@@ -71,18 +93,13 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
       `Fetching from Open-Meteo for coordinates: ${latitude}, ${longitude}`
     );
 
-    // Determine units
-    const temperatureUnit = units === "metric" ? "celsius" : "fahrenheit";
-    const windspeedUnit = units === "metric" ? "ms" : "mph";
-    const precipitationUnit = units === "metric" ? "mm" : "inch";
-
-    // Fetch weather data
+    // Fetch weather data using provided unit parameters directly
     const weatherUrl =
       `${OPEN_METEO_API}?latitude=${latitude}&longitude=${longitude}` +
       `&current=temperature_2m,relative_humidity_2m,weathercode,wind_speed_10m,wind_direction_10m,wind_gusts_10m,pressure_msl,visibility,is_day` +
       `&hourly=temperature_2m,relative_humidity_2m,weathercode,wind_speed_10m,wind_direction_10m,wind_gusts_10m,precipitation,precipitation_probability` +
       `&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset` +
-      `&temperature_unit=${temperatureUnit}&windspeed_unit=${windspeedUnit}&precipitation_unit=${precipitationUnit}` +
+      `&temperature_unit=${temperature_unit}&windspeed_unit=${windspeed_unit}&precipitation_unit=${precipitation_unit}` +
       `&timezone=auto`;
 
     const weatherResponse = await fetch(weatherUrl);
@@ -103,7 +120,12 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
          VALUES ($1, $2, $3, $4)
          ON CONFLICT (city, units) 
          DO UPDATE SET data = $3, updated_at = $4`,
-        [cacheKey, units, JSON.stringify(weatherData), new Date().toISOString()]
+        [
+          cacheKey,
+          unitsKey,
+          JSON.stringify(weatherData),
+          new Date().toISOString(),
+        ]
       );
       console.log(`Cached weather data for coordinates ${cacheKey}`);
     } catch (cacheError) {
