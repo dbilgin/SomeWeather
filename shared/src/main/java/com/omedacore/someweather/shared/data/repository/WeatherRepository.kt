@@ -125,10 +125,6 @@ class WeatherRepository(
         preferencesManager.saveCityDisplay(display)
     }
 
-    suspend fun saveCoordinates(coordinates: Coordinates) {
-        preferencesManager.saveCachedCoordinates(coordinates.lat, coordinates.lon)
-    }
-
     suspend fun saveSelectedCityCoordinates(lat: Double, lon: Double) {
         preferencesManager.saveSelectedCityCoordinates(lat, lon)
     }

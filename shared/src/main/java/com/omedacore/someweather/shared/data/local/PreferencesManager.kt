@@ -24,14 +24,11 @@ class PreferencesManager(private val context: Context) {
         private val CITY_DISPLAY_KEY = stringPreferencesKey("city_display")
         private val UNIT_SYSTEM_KEY = stringPreferencesKey("unit_system")
         private val CACHED_WEATHER_KEY = stringPreferencesKey("cached_weather")
-        private val CACHED_ASTRONOMY_KEY = stringPreferencesKey("cached_astronomy")
         private val CACHE_TIMESTAMP_KEY = longPreferencesKey("cache_timestamp")
         private val CACHED_LATITUDE_KEY = doublePreferencesKey("cached_latitude")
         private val CACHED_LONGITUDE_KEY = doublePreferencesKey("cached_longitude")
         private val SELECTED_LATITUDE_KEY = doublePreferencesKey("selected_latitude")
         private val SELECTED_LONGITUDE_KEY = doublePreferencesKey("selected_longitude")
-        private val CACHED_FORECAST_KEY = stringPreferencesKey("cached_forecast")
-        private val FORECAST_CACHE_TIMESTAMP_KEY = longPreferencesKey("forecast_cache_timestamp")
     }
 
     private val gson = Gson()
@@ -63,7 +60,7 @@ class PreferencesManager(private val context: Context) {
         return try {
             val json = context.dataStore.data.first()[CACHED_WEATHER_KEY]
             json?.let { gson.fromJson(it, WeatherResponse::class.java) }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -96,7 +93,7 @@ class PreferencesManager(private val context: Context) {
             } else {
                 null
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -147,32 +144,6 @@ class PreferencesManager(private val context: Context) {
         }
     }
 
-    suspend fun saveCachedForecast(forecastJson: String) {
-        context.dataStore.edit { preferences ->
-            preferences[CACHED_FORECAST_KEY] = forecastJson
-            preferences[FORECAST_CACHE_TIMESTAMP_KEY] = System.currentTimeMillis()
-        }
-    }
-
-    suspend fun getCachedForecast(): String? {
-        return try {
-            context.dataStore.data.first()[CACHED_FORECAST_KEY]
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    suspend fun clearCachedForecast() {
-        context.dataStore.edit { preferences ->
-            preferences.remove(CACHED_FORECAST_KEY)
-            preferences.remove(FORECAST_CACHE_TIMESTAMP_KEY)
-        }
-    }
-
-    suspend fun getForecastCacheTimestamp(): Long {
-        return context.dataStore.data.first()[FORECAST_CACHE_TIMESTAMP_KEY] ?: 0L
-    }
-
     suspend fun saveSelectedCityCoordinates(lat: Double, lon: Double) {
         context.dataStore.edit { preferences ->
             preferences[SELECTED_LATITUDE_KEY] = lat
@@ -190,9 +161,8 @@ class PreferencesManager(private val context: Context) {
             } else {
                 null
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
 }
-
