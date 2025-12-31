@@ -104,6 +104,32 @@
             android:layout_marginStart="4dp" />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp">
+
+        <TextView
+            android:id="@+id/widget_last_updated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Updated: --"
+            android:textSize="8sp"
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginEnd="8dp" />
+
+        <ImageButton
+            android:id="@+id/widget_refresh_button"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:src="@drawable/refresh"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Refresh weather"
+            android:padding="4dp" />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/widget_attribution_text"
         android:layout_width="wrap_content"
@@ -111,7 +137,7 @@
         android:text="Weather data by Open-Meteo.com"
         android:textSize="8sp"
         android:textColor="@android:color/darker_gray"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="8dp"
         android:gravity="center" />
 
 </LinearLayout>
