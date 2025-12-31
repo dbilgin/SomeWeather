@@ -43,6 +43,6 @@ Add the weather tile to your watch's tile carousel:
 - Tap anywhere on the tile to open the main app
 
 <div>
-   <img width="300" alt="WearTile" src="https://github.com/user-attachments/assets/1b6f78b3-3175-45a0-bbce-2261e813a99e" />
+   <img width="300" alt="WearTile" src="https://github.com/user-attachments/assets/17b630ec-d112-4755-8ce1-eeb76a5c87b3" />
 </div>
 
