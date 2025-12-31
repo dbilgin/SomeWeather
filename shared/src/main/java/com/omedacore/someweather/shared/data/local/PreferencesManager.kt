@@ -36,10 +36,6 @@ class PreferencesManager(private val context: Context) {
 
     private val gson = Gson()
 
-    val cityName: Flow<String?> = context.dataStore.data.map { preferences ->
-        preferences[CITY_NAME_KEY]
-    }
-
     val unitSystem: Flow<UnitSystem?> = context.dataStore.data.map { preferences ->
         preferences[UNIT_SYSTEM_KEY]?.let { UnitSystem.valueOf(it) }
     }

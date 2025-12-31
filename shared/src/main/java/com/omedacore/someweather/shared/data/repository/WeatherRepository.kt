@@ -8,6 +8,7 @@ import com.omedacore.someweather.shared.data.model.Coordinates
 import com.omedacore.someweather.shared.data.model.GeocodingResponse
 import com.omedacore.someweather.shared.data.model.UnitSystem
 import com.omedacore.someweather.shared.data.model.WeatherResponse
+import com.omedacore.someweather.shared.data.util.WeatherApiParams
 import com.omedacore.someweather.shared.data.util.UnitConverter
 
 class WeatherRepository(
@@ -60,6 +61,12 @@ class WeatherRepository(
         val windspeedUnit = UnitConverter.convertWindspeedUnit(unitSystem)
         val precipitationUnit = UnitConverter.convertPrecipitationUnit(unitSystem)
 
+        // Get weather API parameter strings
+        val currentParams = WeatherApiParams.getCurrentParams()
+        val hourlyParams = WeatherApiParams.getHourlyParams()
+        val dailyParams = WeatherApiParams.getDailyParams()
+        val timezone = WeatherApiParams.getTimezone()
+
         // Fetch from backend (which caches for 30 min)
         return try {
             val response = weatherAPI.getWeather(
@@ -68,7 +75,11 @@ class WeatherRepository(
                     longitude = lon,
                     temperatureUnit = temperatureUnit,
                     windspeedUnit = windspeedUnit,
-                    precipitationUnit = precipitationUnit
+                    precipitationUnit = precipitationUnit,
+                    current = currentParams,
+                    hourly = hourlyParams,
+                    daily = dailyParams,
+                    timezone = timezone
                 )
             )
 

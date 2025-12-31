@@ -12,6 +12,10 @@ interface WeatherRequestBody {
   temperature_unit?: "celsius" | "fahrenheit";
   windspeed_unit?: "ms" | "mph";
   precipitation_unit?: "mm" | "inch";
+  current?: string;
+  hourly?: string;
+  daily?: string;
+  timezone?: string;
 }
 
 interface WeatherData {
@@ -28,28 +32,30 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
     const {
       latitude,
       longitude,
-      temperature_unit = "celsius",
-      windspeed_unit = "ms",
-      precipitation_unit = "mm",
+      temperature_unit,
+      windspeed_unit,
+      precipitation_unit,
+      current,
+      hourly,
+      daily,
+      timezone,
     } = body;
 
-    if (latitude === undefined || longitude === undefined) {
-      res.status(400).json({
-        error: "Bad Request",
-        message: "Latitude and longitude parameters are required",
-      });
-      return;
-    }
-
     if (
+      latitude === undefined ||
+      longitude === undefined ||
       temperature_unit === undefined ||
       windspeed_unit === undefined ||
-      precipitation_unit === undefined
+      precipitation_unit === undefined ||
+      current === undefined ||
+      hourly === undefined ||
+      daily === undefined ||
+      timezone === undefined
     ) {
       res.status(400).json({
         error: "Bad Request",
         message:
-          "temperature_unit, windspeed_unit, and precipitation_unit parameters are required",
+          "All parameters (latitude, longitude, temperature_unit, windspeed_unit, precipitation_unit, current, hourly, daily, timezone) are required",
       });
       return;
     }
@@ -93,14 +99,14 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
       `Fetching from Open-Meteo for coordinates: ${latitude}, ${longitude}`
     );
 
-    // Fetch weather data using provided unit parameters directly
+    // Fetch weather data using provided parameters directly
     const weatherUrl =
       `${OPEN_METEO_API}?latitude=${latitude}&longitude=${longitude}` +
-      `&current=temperature_2m,relative_humidity_2m,weathercode,wind_speed_10m,wind_direction_10m,wind_gusts_10m,pressure_msl,visibility,is_day` +
-      `&hourly=temperature_2m,relative_humidity_2m,weathercode,wind_speed_10m,wind_direction_10m,wind_gusts_10m,precipitation,precipitation_probability` +
-      `&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset` +
+      `&current=${current}` +
+      `&hourly=${hourly}` +
+      `&daily=${daily}` +
       `&temperature_unit=${temperature_unit}&windspeed_unit=${windspeed_unit}&precipitation_unit=${precipitation_unit}` +
-      `&timezone=auto`;
+      `&timezone=${timezone}`;
 
     const weatherResponse = await fetch(weatherUrl);
     const weatherData = (await weatherResponse.json()) as WeatherData;

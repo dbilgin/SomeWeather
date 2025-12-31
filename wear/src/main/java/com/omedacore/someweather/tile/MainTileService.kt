@@ -53,6 +53,7 @@ class MainTileService : SuspendingTileService() {
     ): TileBuilders.Tile {
         val coords = repository.getSelectedCityCoordinates()
         val unitSystem = repository.getUnitSystem() ?: UnitSystem.METRIC
+        val cityName = repository.getSavedCity() ?: repository.getSavedCityDisplay() ?: ""
         
         val weather = if (coords != null) {
             val (lat, lon) = coords
@@ -66,7 +67,7 @@ class MainTileService : SuspendingTileService() {
                 TimelineBuilders.TimelineEntry.Builder()
                     .setLayout(
                         LayoutElementBuilders.Layout.Builder()
-                            .setRoot(tileLayout(requestParams, applicationContext, weather, unitSystem, coords != null))
+                            .setRoot(tileLayout(requestParams, applicationContext, weather, cityName, unitSystem, coords != null))
                             .build()
                     )
                     .build()
@@ -84,6 +85,7 @@ private fun tileLayout(
     requestParams: RequestBuilders.TileRequest,
     context: Context,
     weather: WeatherResponse?,
+    cityName: String,
     unitSystem: UnitSystem,
     hasCity: Boolean
 ): LayoutElementBuilders.LayoutElement {
@@ -125,7 +127,7 @@ private fun tileLayout(
         )
         .addContent(
             // City name
-            Text.Builder(context, weather.name)
+            Text.Builder(context, cityName.ifEmpty { "Unknown" })
                 .setColor(argb(Colors.DEFAULT.onSurface))
                 .setTypography(Typography.TYPOGRAPHY_BODY2)
                 .build()
@@ -164,19 +166,29 @@ private fun tileLayout(
         )
         .addContent(
             // Open-Meteo attribution text
-            Text.Builder(context, "Open-Meteo")
-                .setColor(argb(Colors.DEFAULT.primary))
-                .setTypography(Typography.TYPOGRAPHY_CAPTION3)
+            LayoutElementBuilders.Text.Builder()
+                .setText("Weather data by\nOpen-Meteo.com")
+                .setFontStyle(
+                    LayoutElementBuilders.FontStyle.Builder()
+                        .setSize(
+                            DimensionBuilders.SpProp.Builder()
+                                .setValue(6f)
+                                .build()
+                        )
+                        .setColor(argb(Colors.DEFAULT.onSurface))
+                        .build()
+                )
+                .setMaxLines(2)
                 .build()
         )
         .setModifiers(
             ModifiersBuilders.Modifiers.Builder()
                 .setPadding(
                     ModifiersBuilders.Padding.Builder()
-                        .setStart(DimensionBuilders.DpProp.Builder(4f).build())
-                        .setEnd(DimensionBuilders.DpProp.Builder(4f).build())
-                        .setTop(DimensionBuilders.DpProp.Builder(4f).build())
-                        .setBottom(DimensionBuilders.DpProp.Builder(4f).build())
+                        .setStart(DimensionBuilders.DpProp.Builder(0f).build())
+                        .setEnd(DimensionBuilders.DpProp.Builder(0f).build())
+                        .setTop(DimensionBuilders.DpProp.Builder(0f).build())
+                        .setBottom(DimensionBuilders.DpProp.Builder(0f).build())
                         .build()
                 )
                 .setClickable(
@@ -271,7 +283,7 @@ fun tilePreview(context: Context) = TilePreviewData(
             TimelineBuilders.TimelineEntry.Builder()
                 .setLayout(
                     LayoutElementBuilders.Layout.Builder()
-                        .setRoot(tileLayout(requestParams, context, mockWeather, UnitSystem.METRIC, true))
+                        .setRoot(tileLayout(requestParams, context, mockWeather, "Sample City", UnitSystem.METRIC, true))
                         .build()
                 )
                 .build()

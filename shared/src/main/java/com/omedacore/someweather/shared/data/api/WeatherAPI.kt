@@ -1,5 +1,6 @@
 package com.omedacore.someweather.shared.data.api
 
+import com.google.gson.annotations.SerializedName
 import com.omedacore.someweather.shared.data.model.GeocodingResponse
 import com.omedacore.someweather.shared.data.model.WeatherResponse
 import retrofit2.http.Body
@@ -11,9 +12,16 @@ import retrofit2.http.POST
 data class GetWeatherRequest(
     val latitude: Double,
     val longitude: Double,
+    @SerializedName("temperature_unit")
     val temperatureUnit: String,
+    @SerializedName("windspeed_unit")
     val windspeedUnit: String,
-    val precipitationUnit: String
+    @SerializedName("precipitation_unit")
+    val precipitationUnit: String,
+    val current: String,
+    val hourly: String,
+    val daily: String,
+    val timezone: String
 )
 
 /**
