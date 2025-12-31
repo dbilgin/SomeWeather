@@ -112,8 +112,7 @@ class WeatherWidgetProvider : AppWidgetProvider() {
                 views.setTextViewText(R.id.widget_last_updated, lastUpdatedText)
                 
                 if (coords != null) {
-                    val (lat, lon) = coords
-                    val weatherResult = repository.getWeatherWithCoordinates(lat, lon, unitSystem)
+                    val weatherResult = repository.getWeatherWithCoordinates()
                     weatherResult.fold(
                         onSuccess = { weather ->
                             val temperature = WeatherFormatter.formatTemperature(weather, unitSystem)

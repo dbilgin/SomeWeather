@@ -49,7 +49,10 @@ class WeatherComplicationProviderService : SuspendingComplicationDataSourceServi
 
     override fun getPreviewData(type: ComplicationType): ComplicationData? {
         val icon =
-            Icon.createWithResource(applicationContext, com.omedacore.someweather.shared.R.drawable.x)
+            Icon.createWithResource(
+                applicationContext,
+                com.omedacore.someweather.shared.R.drawable.x
+            )
         val monochromaticImage = MonochromaticImage.Builder(icon).build()
         val tapAction = createTapIntent()
 
@@ -90,7 +93,8 @@ class WeatherComplicationProviderService : SuspendingComplicationDataSourceServi
 
                 LongTextComplicationData.Builder(
                     text = PlainComplicationText.Builder("22°C").build(),
-                    contentDescription = PlainComplicationText.Builder("Date: $dateText, Temperature: 22°C").build()
+                    contentDescription = PlainComplicationText.Builder("Date: $dateText, Temperature: 22°C")
+                        .build()
                 )
                     .setTitle(PlainComplicationText.Builder(dateText).build())
                     .setMonochromaticImage(monochromaticImage)
@@ -105,28 +109,23 @@ class WeatherComplicationProviderService : SuspendingComplicationDataSourceServi
     override suspend fun onComplicationRequest(
         request: ComplicationRequest
     ): ComplicationData? = withContext(Dispatchers.IO) {
-        Log.d(TAG, "Fetching now")
         val unitSystem = repository.getUnitSystem()
         Log.d(TAG, "Unit System: " + (unitSystem?.name ?: "null"))
         val unitSystemFinal = unitSystem ?: UnitSystem.METRIC
 
-        // Get coordinates and fetch weather data using repository
-        val coords = repository.getSelectedCityCoordinates()
-        if (coords == null) {
-            Log.d(TAG, "No coordinates saved, returning null")
-            return@withContext null
-        }
-        val (lat, lon) = coords
-        val weatherResult = repository.getWeatherWithCoordinates(lat, lon, unitSystemFinal)
+        val weatherResult = repository.getWeatherWithCoordinates()
         val weatherResponse = weatherResult.getOrElse {
+            WeatherSync.enqueue(applicationContext)
+
             Log.e(TAG, "Error fetching weather for complication", it)
             // Return fallback
             val unit = if (unitSystemFinal == UnitSystem.METRIC) "°C" else "°F"
             val calendar = Calendar.getInstance()
-            val locale = applicationContext.resources.configuration.locales[0] ?: Locale.getDefault()
+            val locale =
+                applicationContext.resources.configuration.locales[0] ?: Locale.getDefault()
             val dateFormat = SimpleDateFormat("MMM d", locale)
             val dateText = dateFormat.format(calendar.time)
-            
+
             return@withContext when (request.complicationType) {
                 ComplicationType.SHORT_TEXT -> {
                     ShortTextComplicationData.Builder(
@@ -152,7 +151,8 @@ class WeatherComplicationProviderService : SuspendingComplicationDataSourceServi
         }
         Log.d(TAG, "Got response: Temp " + weatherResponse.main.temp)
 
-        val temperatureFormatted = WeatherFormatter.formatTemperature(weatherResponse, unitSystemFinal)
+        val temperatureFormatted =
+            WeatherFormatter.formatTemperature(weatherResponse, unitSystemFinal)
         // Extract temperature and unit for ranged value complication
         val temperature = weatherResponse.main.temp.roundToInt()
 
@@ -164,7 +164,11 @@ class WeatherComplicationProviderService : SuspendingComplicationDataSourceServi
             if (weatherResponse.main.tempMax.roundToInt() <= temperature) temperature + 1 else weatherResponse.main.tempMax.roundToInt()
 
         val condition = WeatherFormatter.getCondition(weatherResponse)
-        val iconResId = WeatherIconHelper.getWeatherIconResId(condition.conditionCode, weatherResponse.sys.sunrise, weatherResponse.sys.sunset)
+        val iconResId = WeatherIconHelper.getWeatherIconResId(
+            condition.conditionCode,
+            weatherResponse.sys.sunrise,
+            weatherResponse.sys.sunset
+        )
         val icon = Icon.createWithResource(applicationContext, iconResId)
         val monochromaticImage = MonochromaticImage.Builder(icon).build()
         val tapAction = createTapIntent()

@@ -37,7 +37,21 @@ class WeatherRepository(
      * Get weather data using coordinates.
      * Backend caches for 30 minutes, local cache for 5 minutes.
      */
-    suspend fun getWeatherWithCoordinates(lat: Double, lon: Double, unitSystem: UnitSystem): Result<WeatherResponse> {
+    suspend fun getWeatherWithCoordinates(): Result<WeatherResponse> {
+        Log.d(TAG, "Fetching now")
+        val unitSystemRaw = getUnitSystem()
+        Log.d(TAG, "Unit System: " + (unitSystemRaw?.name ?: "null"))
+        val unitSystem = unitSystemRaw ?: UnitSystem.METRIC
+
+        // Get coordinates and fetch weather data using repository
+        val selectedCoords = getSelectedCityCoordinates()
+        if (selectedCoords == null) {
+            Log.d(TAG, "No coordinates saved, returning null")
+            return Result.failure(Error("coord null"))
+        }
+        val (selectedLat, selectedLon) = selectedCoords
+        // Prepared data
+
         Log.d(TAG, "Getting weather data")
         // Check local cache first (5 min)
         val cachedWeather = preferencesManager.getCachedWeather()
@@ -50,7 +64,7 @@ class WeatherRepository(
             if (cachedCoords != null) {
                 val (cachedLat, cachedLon) = cachedCoords
                 // Check if coordinates match (within small tolerance)
-                if (kotlin.math.abs(cachedLat - lat) < 0.001 && kotlin.math.abs(cachedLon - lon) < 0.001) {
+                if (kotlin.math.abs(cachedLat - selectedLat) < 0.001 && kotlin.math.abs(cachedLon - selectedLon) < 0.001) {
                     Log.d(TAG, "Got cached data")
                     // Local cache is fresh and for the correct coordinates
                     return Result.success(cachedWeather)
@@ -73,8 +87,8 @@ class WeatherRepository(
         return try {
             val response = weatherAPI.getWeather(
                 GetWeatherRequest(
-                    latitude = lat,
-                    longitude = lon,
+                    latitude = selectedLat,
+                    longitude = selectedLon,
                     temperatureUnit = temperatureUnit,
                     windspeedUnit = windspeedUnit,
                     precipitationUnit = precipitationUnit,
@@ -87,6 +101,7 @@ class WeatherRepository(
 
             // Save coordinates for cache verification
             preferencesManager.saveCachedCoordinates(response.latitude, response.longitude)
+            saveSelectedCityCoordinates(response.latitude, response.longitude)
 
             // Save to local cache
             preferencesManager.saveCachedWeather(response)
@@ -99,7 +114,7 @@ class WeatherRepository(
             val cachedCoords = preferencesManager.getCachedCoordinates()
             if (cachedWeather != null && cachedCoords != null) {
                 val (cachedLat, cachedLon) = cachedCoords
-                if (kotlin.math.abs(cachedLat - lat) < 0.001 && kotlin.math.abs(cachedLon - lon) < 0.001) {
+                if (kotlin.math.abs(cachedLat - selectedLat) < 0.001 && kotlin.math.abs(cachedLon - selectedLon) < 0.001) {
                     Result.success(cachedWeather)
                 } else {
                     Result.failure(e)

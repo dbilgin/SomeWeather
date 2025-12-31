@@ -96,4 +96,6 @@ dependencies {
 
     // Wear OS Remote Interactions
     implementation(libs.wear.remote.interactions)
+
+    implementation(libs.androidx.work.runtime.ktx)
 }

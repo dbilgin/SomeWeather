@@ -56,8 +56,7 @@ class MainTileService : SuspendingTileService() {
         val cityName = repository.getSavedCity() ?: repository.getSavedCityDisplay() ?: ""
         
         val weather = if (coords != null) {
-            val (lat, lon) = coords
-            repository.getWeatherWithCoordinates(lat, lon, unitSystem).getOrNull()
+            repository.getWeatherWithCoordinates().getOrNull()
         } else {
             null
         }
