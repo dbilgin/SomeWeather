@@ -1,5 +1,6 @@
 package com.omedacore.someweather.shared.data.repository
 
+import android.util.Log
 import com.omedacore.someweather.shared.data.api.GetWeatherRequest
 import com.omedacore.someweather.shared.data.api.RetrofitClient
 import com.omedacore.someweather.shared.data.api.SearchCityRequest
@@ -89,6 +90,7 @@ class WeatherRepository(
             preferencesManager.saveCachedWeather(response)
             Result.success(response)
         } catch (e: Exception) {
+            Log.e(TAG, "Failed to get weather data ${e.message}")
             // If API fails but we have cached data (even if stale), return it
             val cachedCoords = preferencesManager.getCachedCoordinates()
             if (cachedWeather != null && cachedCoords != null) {
@@ -138,5 +140,9 @@ class WeatherRepository(
 
     suspend fun saveUnitSystem(unitSystem: UnitSystem) {
         preferencesManager.saveUnitSystem(unitSystem)
+    }
+
+    companion object {
+        private const val TAG = "WeatherRepository"
     }
 }
