@@ -38,6 +38,7 @@ class WeatherRepository(
      * Backend caches for 30 minutes, local cache for 5 minutes.
      */
     suspend fun getWeatherWithCoordinates(lat: Double, lon: Double, unitSystem: UnitSystem): Result<WeatherResponse> {
+        Log.d(TAG, "Getting weather data")
         // Check local cache first (5 min)
         val cachedWeather = preferencesManager.getCachedWeather()
         val cacheTimestamp = preferencesManager.getCacheTimestamp()
@@ -50,6 +51,7 @@ class WeatherRepository(
                 val (cachedLat, cachedLon) = cachedCoords
                 // Check if coordinates match (within small tolerance)
                 if (kotlin.math.abs(cachedLat - lat) < 0.001 && kotlin.math.abs(cachedLon - lon) < 0.001) {
+                    Log.d(TAG, "Got cached data")
                     // Local cache is fresh and for the correct coordinates
                     return Result.success(cachedWeather)
                 }
@@ -88,6 +90,8 @@ class WeatherRepository(
 
             // Save to local cache
             preferencesManager.saveCachedWeather(response)
+
+            Log.d(TAG, "Got remote weather data")
             Result.success(response)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to get weather data ${e.message}")
