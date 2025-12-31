@@ -57,13 +57,14 @@ class CompactWeatherWidgetProvider : AppWidgetProvider() {
             try {
                 val preferencesManager = PreferencesManager(context)
                 val repository = WeatherRepository(preferencesManager)
-                val city = repository.getSavedCity()
+                val coords = repository.getSelectedCityCoordinates()
+                val unitSystem = repository.getUnitSystem() ?: com.omedacore.someweather.shared.data.model.UnitSystem.METRIC
                 
-                if (city != null) {
-                    val weatherResult = repository.getWeather(city)
+                if (coords != null) {
+                    val (lat, lon) = coords
+                    val weatherResult = repository.getWeatherWithCoordinates(lat, lon, unitSystem)
                     weatherResult.fold(
                         onSuccess = { weather ->
-                            val unitSystem = repository.getUnitSystem() ?: com.omedacore.someweather.shared.data.model.UnitSystem.METRIC
                             val temperature = WeatherFormatter.formatTemperature(weather, unitSystem)
                             val condition = WeatherFormatter.getCondition(weather)
                             val iconResId = WeatherIconHelper.getWeatherIconResId(

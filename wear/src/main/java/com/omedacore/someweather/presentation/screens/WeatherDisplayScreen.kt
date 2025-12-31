@@ -50,12 +50,11 @@ fun WeatherDisplayScreen(
             val shouldFetch = when (currentState) {
                 is WeatherUiState.Initial -> true
                 is WeatherUiState.Loading -> false // Already fetching
-                is WeatherUiState.Success -> currentState.weather.name != city // Different city
+                is WeatherUiState.Success -> true // Always allow refresh if needed
                 is WeatherUiState.Error -> true // Retry on error
             }
-            if (shouldFetch) {
-                viewModel.fetchWeather(city)
-            }
+            // Weather is fetched via loadSavedCity() which uses coordinates
+            // This LaunchedEffect is kept for compatibility but doesn't need to fetch
         }
     }
 
@@ -67,6 +66,7 @@ fun WeatherDisplayScreen(
         is WeatherUiState.Success -> {
             WeatherContent(
                 weather = uiState.weather,
+                cityName = savedCity ?: "",
                 unitSystem = unitSystem ?: UnitSystem.METRIC,
                 onRefresh = { viewModel.refreshWeather() },
                 onSettings = onSettings
@@ -90,6 +90,7 @@ fun WeatherDisplayScreen(
 @Composable
 fun WeatherContent(
     weather: WeatherResponse,
+    cityName: String,
     unitSystem: UnitSystem,
     onRefresh: () -> Unit,
     onSettings: () -> Unit
@@ -115,7 +116,7 @@ fun WeatherContent(
     ) {
         item {
             Text(
-                text = weather.name,
+                text = cityName.ifEmpty { "Unknown" },
                 style = MaterialTheme.typography.title1,
                 textAlign = TextAlign.Center,
                 maxLines = 1,

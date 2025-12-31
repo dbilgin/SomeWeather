@@ -28,6 +28,7 @@ import java.util.*
 @Composable
 fun CurrentWeatherSection(
     weather: WeatherResponse,
+    cityName: String,
     unitSystem: UnitSystem
 ) {
     var showMoreDetails by remember { mutableStateOf(false) }
@@ -67,7 +68,7 @@ fun CurrentWeatherSection(
         ) {
             // City name
             Text(
-                text = weather.name,
+                text = cityName.ifEmpty { "Unknown" },
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)

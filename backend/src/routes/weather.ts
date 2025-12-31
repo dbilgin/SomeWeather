@@ -4,22 +4,12 @@ import pool from "../db";
 const router = Router();
 
 const OPEN_METEO_API = "https://api.open-meteo.com/v1/forecast";
-const GEOCODING_API = "https://geocoding-api.open-meteo.com/v1/search";
 const CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minutes
 
 interface WeatherRequestBody {
-  city?: string;
+  latitude?: number;
+  longitude?: number;
   units?: "metric" | "imperial";
-}
-
-interface GeocodingResult {
-  latitude: number;
-  longitude: number;
-  name: string;
-}
-
-interface GeocodingResponse {
-  results?: GeocodingResult[];
 }
 
 interface WeatherData {
@@ -33,20 +23,22 @@ interface WeatherData {
 router.post("/", async (req: Request, res: Response): Promise<void> => {
   try {
     const body: WeatherRequestBody = req.body;
-    const { city, units = "metric" } = body;
+    const { latitude, longitude, units = "metric" } = body;
 
-    if (!city) {
+    if (latitude === undefined || longitude === undefined) {
       res.status(400).json({
         error: "Bad Request",
-        message: "City parameter is required",
+        message: "Latitude and longitude parameters are required",
       });
       return;
     }
 
-    console.log(`Fetching weather for city: ${city}, units: ${units}`);
+    console.log(
+      `Fetching weather for coordinates: ${latitude}, ${longitude}, units: ${units}`
+    );
 
-    // Normalize city name for cache key
-    const cacheKey = city.toLowerCase().trim();
+    // Create cache key from coordinates and units
+    const cacheKey = `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
 
     // Check cache
     const cacheResult = await pool.query(
@@ -61,13 +53,13 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
 
       if (now - updatedAt < CACHE_DURATION_MS) {
         // Cache is fresh, return it
-        console.log(`Cache hit for ${city}`);
+        console.log(`Cache hit for coordinates ${cacheKey}`);
         const weatherData: WeatherData = JSON.parse(cached.data);
         res.json(weatherData);
         return;
       } else {
         // Cache expired, delete it
-        console.log(`Cache expired for ${city}, deleting...`);
+        console.log(`Cache expired for coordinates ${cacheKey}, deleting...`);
         await pool.query("DELETE FROM weather_cache WHERE id = $1", [
           cached.id,
         ]);
@@ -75,23 +67,9 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
     }
 
     // No cache or expired - fetch from Open-Meteo
-    console.log(`Fetching from Open-Meteo for ${city}`);
-
-    // First, geocode the city
-    const geoUrl = `${GEOCODING_API}?name=${encodeURIComponent(city)}&count=1`;
-    const geoResponse = await fetch(geoUrl);
-    const geoData = (await geoResponse.json()) as GeocodingResponse;
-
-    if (!geoData.results || geoData.results.length === 0) {
-      res.status(404).json({
-        error: "Not Found",
-        message: "City not found",
-      });
-      return;
-    }
-
-    const location = geoData.results[0];
-    const { latitude, longitude, name: cityName } = location;
+    console.log(
+      `Fetching from Open-Meteo for coordinates: ${latitude}, ${longitude}`
+    );
 
     // Determine units
     const temperatureUnit = units === "metric" ? "celsius" : "fahrenheit";
@@ -118,10 +96,6 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Add city name to response
-    weatherData.name = cityName;
-    weatherData.city_query = city;
-
     // Cache the result
     try {
       await pool.query(
@@ -131,7 +105,7 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
          DO UPDATE SET data = $3, updated_at = $4`,
         [cacheKey, units, JSON.stringify(weatherData), new Date().toISOString()]
       );
-      console.log(`Cached weather data for ${city}`);
+      console.log(`Cached weather data for coordinates ${cacheKey}`);
     } catch (cacheError) {
       console.error(`Failed to cache weather data: ${cacheError}`);
     }
@@ -148,4 +122,3 @@ router.post("/", async (req: Request, res: Response): Promise<void> => {
 });
 
 export default router;
-

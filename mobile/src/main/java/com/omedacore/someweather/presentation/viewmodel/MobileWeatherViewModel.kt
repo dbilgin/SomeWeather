@@ -67,6 +67,13 @@ class MobileWeatherViewModel(
             } ?: run {
                 _savedCityDisplay.value = _savedCity.value
             }
+            // Load coordinates and fetch weather if available
+            val coords = repository.getSelectedCityCoordinates()
+            val currentUnitSystem = _unitSystem.value ?: UnitSystem.METRIC
+            if (coords != null && _savedCity.value != null) {
+                val (lat, lon) = coords
+                fetchWeatherWithCoordinates(lat, lon, currentUnitSystem)
+            }
         }
     }
 
@@ -86,23 +93,24 @@ class MobileWeatherViewModel(
             repository.saveUnitSystem(unitSystem)
             repository.clearWeatherCache()
             _unitSystem.value = unitSystem
-            // Refetch weather with new unit system
-            _savedCity.value?.let { city ->
-                fetchWeather(city)
+            // Refetch weather with new unit system using coordinates
+            val coords = repository.getSelectedCityCoordinates()
+            val currentUnitSystem = _unitSystem.value ?: UnitSystem.METRIC
+            if (coords != null) {
+                val (lat, lon) = coords
+                fetchWeatherWithCoordinates(lat, lon, currentUnitSystem)
             }
         }
     }
 
-    fun fetchWeather(city: String) {
+    fun fetchWeatherWithCoordinates(lat: Double, lon: Double, unitSystem: UnitSystem) {
         viewModelScope.launch {
             _uiState.value = WeatherUiState.Loading
 
-            val weatherResult = repository.getWeather(city)
+            val weatherResult = repository.getWeatherWithCoordinates(lat, lon, unitSystem)
 
             weatherResult.fold(
                 onSuccess = { weather ->
-                    repository.saveCity(city)
-                    repository.saveCoordinates(weather.coord)
                     _uiState.value = WeatherUiState.Success(weather)
                 },
                 onFailure = {
@@ -117,8 +125,11 @@ class MobileWeatherViewModel(
     fun refreshWeather() {
         viewModelScope.launch {
             repository.clearWeatherCache()
-            _savedCity.value?.let { city ->
-                fetchWeather(city)
+            val coords = repository.getSelectedCityCoordinates()
+            val currentUnitSystem = _unitSystem.value ?: UnitSystem.METRIC
+            if (coords != null) {
+                val (lat, lon) = coords
+                fetchWeatherWithCoordinates(lat, lon, currentUnitSystem)
             }
         }
     }
@@ -128,8 +139,11 @@ class MobileWeatherViewModel(
             _savedCity.value = city.name
             _savedCityDisplay.value = city.displayLocation
             repository.saveCityDisplay(city.displayLocation)
-            // Immediately fetch weather with new city
-            fetchWeather(city.name)
+            repository.saveCity(city.name)
+            // Save coordinates and immediately fetch weather with coordinates
+            repository.saveSelectedCityCoordinates(city.latitude, city.longitude)
+            val currentUnitSystem = _unitSystem.value ?: UnitSystem.METRIC
+            fetchWeatherWithCoordinates(city.latitude, city.longitude, currentUnitSystem)
         }
     }
 

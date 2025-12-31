@@ -9,7 +9,8 @@ import retrofit2.http.POST
  * Request body for the weather endpoint
  */
 data class GetWeatherRequest(
-    val city: String,
+    val latitude: Double,
+    val longitude: Double,
     val units: String = "metric"
 )
 

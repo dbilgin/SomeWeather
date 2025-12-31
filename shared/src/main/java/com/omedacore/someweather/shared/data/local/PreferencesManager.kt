@@ -28,6 +28,8 @@ class PreferencesManager(private val context: Context) {
         private val CACHE_TIMESTAMP_KEY = longPreferencesKey("cache_timestamp")
         private val CACHED_LATITUDE_KEY = doublePreferencesKey("cached_latitude")
         private val CACHED_LONGITUDE_KEY = doublePreferencesKey("cached_longitude")
+        private val SELECTED_LATITUDE_KEY = doublePreferencesKey("selected_latitude")
+        private val SELECTED_LONGITUDE_KEY = doublePreferencesKey("selected_longitude")
         private val CACHED_FORECAST_KEY = stringPreferencesKey("cached_forecast")
         private val FORECAST_CACHE_TIMESTAMP_KEY = longPreferencesKey("forecast_cache_timestamp")
     }
@@ -173,6 +175,28 @@ class PreferencesManager(private val context: Context) {
 
     suspend fun getForecastCacheTimestamp(): Long {
         return context.dataStore.data.first()[FORECAST_CACHE_TIMESTAMP_KEY] ?: 0L
+    }
+
+    suspend fun saveSelectedCityCoordinates(lat: Double, lon: Double) {
+        context.dataStore.edit { preferences ->
+            preferences[SELECTED_LATITUDE_KEY] = lat
+            preferences[SELECTED_LONGITUDE_KEY] = lon
+        }
+    }
+
+    suspend fun getSelectedCityCoordinates(): Pair<Double, Double>? {
+        return try {
+            val prefs = context.dataStore.data.first()
+            val lat = prefs[SELECTED_LATITUDE_KEY]
+            val lon = prefs[SELECTED_LONGITUDE_KEY]
+            if (lat != null && lon != null) {
+                Pair(lat, lon)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
     }
 }
 

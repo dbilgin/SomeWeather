@@ -51,11 +51,12 @@ class MainTileService : SuspendingTileService() {
     override suspend fun tileRequest(
         requestParams: RequestBuilders.TileRequest
     ): TileBuilders.Tile {
-        val city = repository.getSavedCity()
+        val coords = repository.getSelectedCityCoordinates()
         val unitSystem = repository.getUnitSystem() ?: UnitSystem.METRIC
         
-        val weather = if (city != null) {
-            repository.getWeather(city).getOrNull()
+        val weather = if (coords != null) {
+            val (lat, lon) = coords
+            repository.getWeatherWithCoordinates(lat, lon, unitSystem).getOrNull()
         } else {
             null
         }
@@ -65,7 +66,7 @@ class MainTileService : SuspendingTileService() {
                 TimelineBuilders.TimelineEntry.Builder()
                     .setLayout(
                         LayoutElementBuilders.Layout.Builder()
-                            .setRoot(tileLayout(requestParams, applicationContext, weather, unitSystem, city != null))
+                            .setRoot(tileLayout(requestParams, applicationContext, weather, unitSystem, coords != null))
                             .build()
                     )
                     .build()

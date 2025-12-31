@@ -104,19 +104,18 @@ class WeatherComplicationProviderService : SuspendingComplicationDataSourceServi
         request: ComplicationRequest
     ): ComplicationData? = withContext(Dispatchers.IO) {
         Log.d(TAG, "Fetching now")
-        val city = repository.getSavedCity()
-        Log.d(TAG, "city " + (city ?: "null"))
-        if (city == null) {
-            Log.d(TAG, "No city saved, returning null")
-            return@withContext null
-        }
-
         val unitSystem = repository.getUnitSystem()
         Log.d(TAG, "Unit System: " + (unitSystem?.name ?: "null"))
         val unitSystemFinal = unitSystem ?: UnitSystem.METRIC
 
-        // Fetch weather data using repository
-        val weatherResult = repository.getWeather(city)
+        // Get coordinates and fetch weather data using repository
+        val coords = repository.getSelectedCityCoordinates()
+        if (coords == null) {
+            Log.d(TAG, "No coordinates saved, returning null")
+            return@withContext null
+        }
+        val (lat, lon) = coords
+        val weatherResult = repository.getWeatherWithCoordinates(lat, lon, unitSystemFinal)
         val weatherResponse = weatherResult.getOrElse {
             Log.e(TAG, "Error fetching weather for complication", it)
             // Return fallback

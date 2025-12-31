@@ -32,45 +32,41 @@ class WeatherRepository(
     }
 
     /**
-     * Get weather data for a city.
+     * Get weather data using coordinates.
      * Backend caches for 30 minutes, local cache for 5 minutes.
      */
-    suspend fun getWeather(city: String): Result<WeatherResponse> {
+    suspend fun getWeatherWithCoordinates(lat: Double, lon: Double, unitSystem: UnitSystem): Result<WeatherResponse> {
         // Check local cache first (5 min)
         val cachedWeather = preferencesManager.getCachedWeather()
         val cacheTimestamp = preferencesManager.getCacheTimestamp()
         val cacheAge = System.currentTimeMillis() - cacheTimestamp
 
         if (cachedWeather != null && cacheAge < LOCAL_CACHE_DURATION_MS) {
-            // Verify cached data is for the requested city
-            val savedCity = getSavedCity()
-            if (savedCity != null && savedCity.equals(city, ignoreCase = true)) {
-                // Local cache is fresh and for the correct city
-                return Result.success(cachedWeather)
+            // Verify cached data is for the requested coordinates
+            val cachedCoords = preferencesManager.getCachedCoordinates()
+            if (cachedCoords != null) {
+                val (cachedLat, cachedLon) = cachedCoords
+                // Check if coordinates match (within small tolerance)
+                if (kotlin.math.abs(cachedLat - lat) < 0.001 && kotlin.math.abs(cachedLon - lon) < 0.001) {
+                    // Local cache is fresh and for the correct coordinates
+                    return Result.success(cachedWeather)
+                }
             }
         }
 
         // Get unit system for API call
-        val unitSystem = getUnitSystem() ?: UnitSystem.METRIC
         val units = when (unitSystem) {
             UnitSystem.METRIC -> "metric"
             UnitSystem.IMPERIAL -> "imperial"
         }
 
-        // Fetch from Appwrite backend (which caches for 30 min)
+        // Fetch from backend (which caches for 30 min)
         return try {
             val response = weatherAPI.getWeather(
-                GetWeatherRequest(city = city, units = units)
+                GetWeatherRequest(latitude = lat, longitude = lon, units = units)
             )
 
-            // Save city name (comes from backend response)
-            if (response.name.isNotEmpty()) {
-                saveCity(response.name)
-            } else {
-                saveCity(city)
-            }
-
-            // Save coordinates for compatibility
+            // Save coordinates for cache verification
             preferencesManager.saveCachedCoordinates(response.latitude, response.longitude)
 
             // Save to local cache
@@ -78,9 +74,14 @@ class WeatherRepository(
             Result.success(response)
         } catch (e: Exception) {
             // If API fails but we have cached data (even if stale), return it
-            val savedCity = getSavedCity()
-            if (cachedWeather != null && savedCity != null && savedCity.equals(city, ignoreCase = true)) {
-                Result.success(cachedWeather)
+            val cachedCoords = preferencesManager.getCachedCoordinates()
+            if (cachedWeather != null && cachedCoords != null) {
+                val (cachedLat, cachedLon) = cachedCoords
+                if (kotlin.math.abs(cachedLat - lat) < 0.001 && kotlin.math.abs(cachedLon - lon) < 0.001) {
+                    Result.success(cachedWeather)
+                } else {
+                    Result.failure(e)
+                }
             } else {
                 Result.failure(e)
             }
@@ -109,6 +110,14 @@ class WeatherRepository(
 
     suspend fun saveCoordinates(coordinates: Coordinates) {
         preferencesManager.saveCachedCoordinates(coordinates.lat, coordinates.lon)
+    }
+
+    suspend fun saveSelectedCityCoordinates(lat: Double, lon: Double) {
+        preferencesManager.saveSelectedCityCoordinates(lat, lon)
+    }
+
+    suspend fun getSelectedCityCoordinates(): Pair<Double, Double>? {
+        return preferencesManager.getSelectedCityCoordinates()
     }
 
     suspend fun getUnitSystem(): UnitSystem? {
