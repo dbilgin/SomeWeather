@@ -155,7 +155,6 @@ class WeatherComplicationProviderService : SuspendingComplicationDataSourceServi
         val temperatureFormatted = WeatherFormatter.formatTemperature(weatherResponse, unitSystemFinal)
         // Extract temperature and unit for ranged value complication
         val temperature = weatherResponse.main.temp.roundToInt()
-        val unit = if (unitSystemFinal == UnitSystem.METRIC) "°C" else "°F"
 
         Log.d(TAG, "Final temp $temperature")
 
