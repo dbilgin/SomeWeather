@@ -1,5 +1,7 @@
 package com.omedacore.someweather.shared.data.util
 
+import java.util.TimeZone
+
 /**
  * Utility object for building weather API parameter strings
  */
@@ -26,11 +28,11 @@ object WeatherApiParams {
     }
 
     /**
-     * Returns the timezone parameter
-     * @return "auto" to use automatic timezone detection
+     * Returns the timezone parameter using the device's IANA timezone identifier
+     * @return The device's timezone ID (e.g., "Europe/Berlin", "America/New_York")
      */
     fun getTimezone(): String {
-        return "auto"
+        return TimeZone.getDefault().id
     }
 }
 
